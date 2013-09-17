@@ -106,15 +106,18 @@ define([
         this.klass = newSubclass(this.options);
       },
 
-      "associations property": function() {
-        this.assertEquals(this.klass.associations, this.options.associations);
-      },
-
       "association getter": function() {
         var foo = new this.klass();
         var bars = foo.getBars();
         this.assertSame(bars, foo.getBars());
-      }
+      },
+
+      "validate association": sinon.test(function() {
+        var foo = new this.klass();
+        var bars = foo.getBars();
+        bars.isValid = sinon.stub().returns(false);
+        this.refute(foo.isValid(), 'expected foo to be invalid');
+      })
     }),
 
     "subclass with hasOne association": function() {
@@ -125,7 +128,6 @@ define([
         }
       };
       var klass = newSubclass(options);
-      this.assertEquals(klass.associations, options.associations);
 
       var foo = new klass();
       this.assertEquals(foo.getBar(), null);
@@ -143,7 +145,6 @@ define([
         }
       };
       var klass = newSubclass(options);
-      this.assertEquals(klass.associations, options.associations);
 
       var foo = new klass();
       this.assertEquals(foo.getBar(), null);
