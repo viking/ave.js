@@ -1,0 +1,5 @@
+[
+  ['^src/js/\(\([^/]\+/\)*\)\(.\+\)\.js$', 'test/js/\1test_\3.js'],
+  ['^test/js/\(\([^/]\+/\)*\)test_\(.\+\)\.js$', 'src/js/\1\3.js'],
+  ['^src/templates/\(.\+\)\.html$', 'src/js/views/\1.js'],
+]
