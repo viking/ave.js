@@ -69,18 +69,6 @@ maria.Model.subclass(ave, 'Model', {
       return true;
     },
 
-    validatesUnique: function(attributeName, set) {
-      var value = this._attributes[attributeName];
-      var valid = true;
-      set.forEach(function(model) {
-        if (valid && model !== this && model.getAttribute(attributeName) == value) {
-          this.addError(attributeName, 'is already taken');
-          valid = false;
-        }
-      }, this);
-      return valid;
-    },
-
     validatesFormat: function(attributeName, pattern) {
       var value = this._attributes[attributeName];
       if (value && !value.toString().match(pattern)) {

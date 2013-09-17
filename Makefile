@@ -3,6 +3,7 @@ SOURCES = src/util.js \
 	  src/validation_helper.js \
 	  src/input_view.js \
 	  src/model.js \
+	  src/set_model.js \
 	  src/router.js
 
 ave.js: $(SOURCES)

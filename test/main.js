@@ -24,6 +24,7 @@ require([
     'test/test_model',
     'test/test_input_view',
     'test/test_router',
+    'test/test_set_model',
   ], function() {
     for (var i = 0; i < arguments.length; i++) {
       runner.addSuite(arguments[i]);

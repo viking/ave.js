@@ -252,26 +252,6 @@ define([
       this.refute(model.isValid());
     },
 
-    "validates unique": function() {
-      var result;
-      var klass = newSubclass();
-      var model_1 = new klass();
-      model_1.setAttribute('foo', 'bar');
-      var model_2 = new klass();
-      model_2.setAttribute('foo', 'baz');
-      var setModel = new maria.SetModel();
-      setModel.add(model_1);
-      setModel.add(model_2);
-      maria.on(model_1, 'validate', function(evt) {
-        result = evt.target.validatesUnique('foo', setModel);
-      });
-      this.assert(model_1.isValid());
-      this.assert(result);
-      model_1.setAttribute('foo', 'baz');
-      this.refute(model_1.isValid());
-      this.refute(result);
-    },
-
     "validates format": function() {
       var result;
       var klass = newSubclass({
