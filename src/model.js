@@ -54,12 +54,12 @@ maria.Model.subclass(ave, 'Model', {
     },
 
     isValid: function() {
-      util.clearProperties(this._errors);
+      ave.clearProperties(this._errors);
       this.validate();
       this.dispatchEvent({type: 'validate'});
 
       /* check for errors */
-      return util.numProperties(this._errors) == 0;
+      return ave.numProperties(this._errors) == 0;
     },
 
     addError: function(attributeName, msg) {
@@ -117,7 +117,7 @@ ave.Model.subclass = function(namespace, name, options) {
   var properties = options.properties || (options.properties = {});
   if (options.associations) {
     for (var associationName in options.associations) {
-      var getterName = 'get' + util.capitalize(associationName);
+      var getterName = 'get' + ave.capitalize(associationName);
       var variableName = '_' + associationName;
       var config = options.associations[associationName];
 
@@ -134,7 +134,7 @@ ave.Model.subclass = function(namespace, name, options) {
           })(variableName, setModel);
           break;
         case 'hasOne':
-          var setterName = 'set' + util.capitalize(associationName);
+          var setterName = 'set' + ave.capitalize(associationName);
           var constructor = config.modelConstructor;
           (function(variableName, constructor) {
             properties[getterName] = function() {
@@ -157,7 +157,7 @@ ave.Model.subclass = function(namespace, name, options) {
   if (options.attributeNames) {
     for (var i = 0; i < options.attributeNames.length; i++) {
       var attributeName = options.attributeNames[i];
-      var camelized = util.camelize(attributeName);
+      var camelized = ave.camelize(attributeName);
       var getterName = 'get' + camelized;
       var setterName = 'set' + camelized;
 

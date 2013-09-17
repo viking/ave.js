@@ -1,18 +1,16 @@
-var util = ave.util = {};
-
-util.capitalize = function(string) {
+ave.capitalize = function(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 };
 
-util.camelize = function(string) {
+ave.camelize = function(string) {
   var result = '';
   string.split('_').forEach(function(s) {
-    result += util.capitalize(s);
+    result += ave.capitalize(s);
   });
   return result;
 };
 
-util.numProperties = function(object) {
+ave.numProperties = function(object) {
   var num = 0;
   for (key in object) {
     if (Object.prototype.hasOwnProperty.call(object, key)) {
@@ -22,7 +20,7 @@ util.numProperties = function(object) {
   return num;
 };
 
-util.clearProperties = function(object) {
+ave.clearProperties = function(object) {
   for (key in object) {
     if (Object.prototype.hasOwnProperty.call(object, key)) {
       delete object[key];
