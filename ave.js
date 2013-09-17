@@ -77,6 +77,46 @@ ave.deepEqual = function(a, b) {
 
   return true;
 };
+ave.RouteHelper = function() {
+};
+
+ave.RouteHelper.prototype.urlFor = function(url) {
+  if (this.parentNode) {
+    return this.parentNode.urlFor(url);
+  }
+  return url;
+};
+
+ave.RouteHelper.mixin = function(obj) {
+  obj.urlFor = ave.RouteHelper.prototype.urlFor;
+  ave.RouteHelper.call(obj);
+};
+ave.ValidationHelper = function() {
+  this._errors = {};
+}
+
+maria.borrow(ave.ValidationHelper.prototype, {
+  validate: function() {
+  },
+
+  isValid: function() {
+    ave.clearProperties(this._errors);
+    this.validate();
+    this.dispatchEvent({type: 'validate'});
+
+    /* check for errors */
+    return ave.numProperties(this._errors) == 0;
+  },
+
+  addError: function(name, msg) {
+    var errors = this._errors[name] || (this._errors[name] = []);
+    errors.push(msg);
+  },
+
+  getErrors: function() {
+    return this._errors;
+  },
+});
 maria.ElementView.subclass(ave, 'InputView', {
   constructor: function() {
     maria.ElementView.apply(this, arguments);
@@ -183,13 +223,14 @@ ave.InputView.subclass = function() {
 maria.Model.subclass(ave, 'Model', {
   constructor: function() {
     maria.Model.apply(this, arguments);
+    ave.ValidationHelper.apply(this);
+
     this._attributes = {};
     if (this._attributeNames) {
       for (var i = 0; i < this._attributeNames.length; i++) {
         this._attributes[this._attributeNames[i]] = null;
       }
     }
-    this._errors = {};
   },
   properties: {
     _attributeNames: null,
@@ -232,27 +273,6 @@ maria.Model.subclass(ave, 'Model', {
       return this._attributes;
     },
 
-    validate: function() {
-    },
-
-    isValid: function() {
-      ave.clearProperties(this._errors);
-      this.validate();
-      this.dispatchEvent({type: 'validate'});
-
-      /* check for errors */
-      return ave.numProperties(this._errors) == 0;
-    },
-
-    addError: function(attributeName, msg) {
-      var errors = this._errors[attributeName] || (this._errors[attributeName] = []);
-      errors.push(msg);
-    },
-
-    getErrors: function() {
-      return this._errors;
-    },
-
     validatesPresence: function(attributeName) {
       if (!this._attributes.hasOwnProperty(attributeName) ||
           this._attributes[attributeName] == null ||
@@ -293,6 +313,8 @@ maria.Model.subclass(ave, 'Model', {
     }
   }
 });
+
+maria.borrow(ave.Model.prototype, ave.ValidationHelper.prototype);
 
 ave.Model.subclass = function(namespace, name, options) {
   options = options || {};
@@ -367,20 +389,6 @@ ave.Model.subclass = function(namespace, name, options) {
   if (options.collectionName) {
     klass.collectionName = options.collectionName;
   }
-};
-ave.RouteHelper = function() {
-};
-
-ave.RouteHelper.prototype.urlFor = function(url) {
-  if (this.parentNode) {
-    return this.parentNode.urlFor(url);
-  }
-  return url;
-};
-
-ave.RouteHelper.mixin = function(obj) {
-  obj.urlFor = ave.RouteHelper.prototype.urlFor;
-  ave.RouteHelper.call(obj);
 };
 maria.Model.subclass(ave, 'Router', {
   constructor: function() {

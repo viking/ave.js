@@ -1,7 +1,8 @@
 SOURCES = src/util.js \
+	  src/route_helper.js \
+	  src/validation_helper.js \
 	  src/input_view.js \
 	  src/model.js \
-	  src/route_helper.js \
 	  src/router.js
 
 ave.js: $(SOURCES)

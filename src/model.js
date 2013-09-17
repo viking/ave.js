@@ -1,13 +1,14 @@
 maria.Model.subclass(ave, 'Model', {
   constructor: function() {
     maria.Model.apply(this, arguments);
+    ave.ValidationHelper.apply(this);
+
     this._attributes = {};
     if (this._attributeNames) {
       for (var i = 0; i < this._attributeNames.length; i++) {
         this._attributes[this._attributeNames[i]] = null;
       }
     }
-    this._errors = {};
   },
   properties: {
     _attributeNames: null,
@@ -50,27 +51,6 @@ maria.Model.subclass(ave, 'Model', {
       return this._attributes;
     },
 
-    validate: function() {
-    },
-
-    isValid: function() {
-      ave.clearProperties(this._errors);
-      this.validate();
-      this.dispatchEvent({type: 'validate'});
-
-      /* check for errors */
-      return ave.numProperties(this._errors) == 0;
-    },
-
-    addError: function(attributeName, msg) {
-      var errors = this._errors[attributeName] || (this._errors[attributeName] = []);
-      errors.push(msg);
-    },
-
-    getErrors: function() {
-      return this._errors;
-    },
-
     validatesPresence: function(attributeName) {
       if (!this._attributes.hasOwnProperty(attributeName) ||
           this._attributes[attributeName] == null ||
@@ -111,6 +91,8 @@ maria.Model.subclass(ave, 'Model', {
     }
   }
 });
+
+maria.borrow(ave.Model.prototype, ave.ValidationHelper.prototype);
 
 ave.Model.subclass = function(namespace, name, options) {
   options = options || {};
