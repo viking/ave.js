@@ -47,5 +47,28 @@ define([
       this.assertEquals('undefined', typeof(obj.foo));
       this.assertEquals('undefined', typeof(obj.bar));
     },
+
+    "arraysEqual": new prod.Suite("arraysEqual", {
+      "arrays are equal when they're the same object": function() {
+        var x = [];
+        this.assert(ave.arraysEqual(x, x));
+      },
+
+      "arrays are not equal if one array is null": function() {
+        this.refute(ave.arraysEqual(null, []));
+      },
+
+      "arrays are not equal if they are different lengths": function() {
+        this.refute(ave.arraysEqual([], ['foo']));
+      },
+
+      "arrays are equal if they contain equal data": function() {
+        this.assert(ave.arraysEqual(['foo'], ['foo']));
+      },
+
+      "arrays are not equal if they contain inequal data": function() {
+        this.refute(ave.arraysEqual(['foo'], ['bar']));
+      }
+    }),
   });
 });
