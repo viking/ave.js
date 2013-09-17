@@ -117,6 +117,9 @@ define([
         var bars = foo.getBars();
         bars.isValid = sinon.stub().returns(false);
         this.refute(foo.isValid(), 'expected foo to be invalid');
+
+        var errors = foo.getErrors();
+        this.assertEquals('is invalid', errors['bars'][0]);
       })
     }),
 
@@ -148,6 +151,17 @@ define([
           foo.setBar(obj);
         });
       },
+
+      "validate association": sinon.test(function() {
+        var foo = new this.klass();
+        var bar = new this.modelConstructor();
+        foo.setBar(bar);
+        bar.isValid = sinon.stub().returns(false);
+        this.refute(foo.isValid(), 'expected foo to be invalid');
+
+        var errors = foo.getErrors();
+        this.assertEquals('is invalid', errors['bar'][0]);
+      })
     }),
 
     "attribute names": function() {
