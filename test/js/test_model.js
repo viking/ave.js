@@ -2,8 +2,10 @@ define([
   'lib/prod',
   'lib/sinon',
   'lib/maria',
-  'model'
-], function(prod, sinon, maria, Model) {
+  'ave'
+], function(prod, sinon, maria, ave) {
+  var Model = ave.Model;
+
   function newSubclass(options) {
     var namespace = {};
     Model.subclass(namespace, 'FooModel', options);

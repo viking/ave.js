@@ -1,7 +1,9 @@
 define([
   'lib/prod',
-  'util'
-], function(prod, util) {
+  'ave'
+], function(prod, ave) {
+  var util = ave.util;
+
   return new prod.Suite('util', {
     "camelize": function() {
       this.assertEquals("FooBar", util.camelize("foo_bar"));

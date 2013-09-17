@@ -2,8 +2,10 @@ define([
   'lib/prod',
   'lib/sinon',
   'lib/maria',
-  'router'
-], function(prod, sinon, maria, Router) {
+  'ave'
+], function(prod, sinon, maria, ave) {
+  var Router = ave.Router;
+
   return new prod.Suite('Router', {
     setUp: function() {
       this.window = {

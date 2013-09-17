@@ -1,8 +1,8 @@
 require.config({
-  baseUrl: '../src/js',
+  baseUrl: '..',
   paths: {
-    lib: '../../lib',
-    test: '../../test/js'
+    lib: 'lib',
+    test: 'test/js'
   }
 });
 

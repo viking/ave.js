@@ -1,8 +1,10 @@
 define([
   'lib/prod',
   'lib/maria',
-  'input_view'
-], function(prod, maria, InputView) {
+  'ave'
+], function(prod, maria, ave) {
+  var InputView = ave.InputView;
+
   function newSubclass(options) {
     var namespace = {};
     InputView.subclass(namespace, 'FooInputView', options);
