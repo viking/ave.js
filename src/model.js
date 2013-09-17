@@ -17,7 +17,7 @@ maria.Model.subclass(ave, 'Model', {
         throw("invalid attribute: " + name);
       }
 
-      if (this._attributes[name] != value) {
+      if (!ave.deepEqual(this._attributes[name], value)) {
         this._attributes[name] = value;
         if (!quiet) {
           this.dispatchEvent({type: 'change'});

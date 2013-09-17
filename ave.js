@@ -39,14 +39,42 @@ ave.instantiateModel = function(modelClass, attributes) {
   return model;
 };
 
-ave.arraysEqual = function(a, b) {
+ave.deepEqual = function(a, b) {
   if (a === b) return true;
+  if (typeof(a) != typeof(b)) return false;
+  if (typeof(a) != 'object') return a == b;
   if (a == null || b == null) return false;
-  if (a.length != b.length) return false;
 
-  for (var i = 0; i < a.length; ++i) {
-    if (a[i] !== b[i]) return false;
+  if (a instanceof Array && b instanceof Array) {
+    if (a.length != b.length) return false;
+
+    for (var i = 0; i < a.length; ++i) {
+      if (a[i] !== b[i]) return false;
+    }
+    return true;
   }
+
+  var aKeys = [];
+  for (var key in a) {
+    aKeys.push(key);
+  }
+
+  for (var key in b) {
+    var index = aKeys.indexOf(key);
+    if (index < 0) {
+      return false;
+    }
+    aKeys.splice(index, 1);
+
+    if (!ave.deepEqual(a[key], b[key])) {
+      return false;
+    }
+  }
+
+  if (aKeys.length > 0) {
+    return false;
+  }
+
   return true;
 };
 maria.ElementView.subclass(ave, 'InputView', {
@@ -171,7 +199,7 @@ maria.Model.subclass(ave, 'Model', {
         throw("invalid attribute: " + name);
       }
 
-      if (this._attributes[name] != value) {
+      if (!ave.deepEqual(this._attributes[name], value)) {
         this._attributes[name] = value;
         if (!quiet) {
           this.dispatchEvent({type: 'change'});

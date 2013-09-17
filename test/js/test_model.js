@@ -49,6 +49,17 @@ define([
       this.refuteCalled(spy);
     },
 
+    "setAttribute doesn't trigger change event for same equal value": function() {
+      var klass = newSubclass();
+      var model = new klass();
+      model.setAttribute("foo", [123]);
+
+      var spy = sinon.spy();
+      maria.on(model, "change", spy);
+      model.setAttribute("foo", [123]);
+      this.refuteCalled(spy);
+    },
+
     "setAttributes triggers change event once": function() {
       var klass = newSubclass();
       var model = new klass();
