@@ -120,40 +120,35 @@ define([
       })
     }),
 
-    "subclass with hasOne association": function() {
-      var modelConstructor = function() { };
-      var options = {
-        associations: {
-          bar: {type: 'hasOne', modelConstructor: modelConstructor}
-        }
-      };
-      var klass = newSubclass(options);
+    "subclass with hasOne association": new prod.Suite('subclass with hasOne association', {
+      setUp: function() {
+        this.modelConstructor = function() { };
+        this.options = {
+          associations: {
+            bar: {type: 'hasOne', modelConstructor: this.modelConstructor}
+          }
+        };
+        this.klass = newSubclass(this.options);
+      },
 
-      var foo = new klass();
-      this.assertEquals(foo.getBar(), null);
+      "association accessors": function() {
+        var foo = new this.klass();
+        this.assertEquals(foo.getBar(), null);
 
-      var bar = new modelConstructor();
-      foo.setBar(bar);
-      this.assertSame(foo.getBar(), bar);
-    },
+        var bar = new this.modelConstructor();
+        foo.setBar(bar);
+        this.assertSame(foo.getBar(), bar);
+      },
 
-    "hasOne association requires proper class": function() {
-      var modelConstructor = function() { };
-      var options = {
-        associations: {
-          bar: {type: 'hasOne', modelConstructor: modelConstructor}
-        }
-      };
-      var klass = newSubclass(options);
+      "setter requires proper class": function() {
+        var foo = new this.klass();
 
-      var foo = new klass();
-      this.assertEquals(foo.getBar(), null);
-
-      var obj = new (function() {})();
-      this.assertException(function() {
-        foo.setBar(obj);
-      });
-    },
+        var obj = new (function() {})();
+        this.assertException(function() {
+          foo.setBar(obj);
+        });
+      },
+    }),
 
     "attribute names": function() {
       var klass = newSubclass({
