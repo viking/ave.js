@@ -95,19 +95,27 @@ define([
       this.assertEquals(klass.collectionName, "foos");
     },
 
-    "subclass with hasMany association": function() {
-      var setModel = sinon.spy();
-      var options = {
-        associations: {
-          bars: {type: 'hasMany', setModel: setModel}
-        }
-      };
-      var klass = newSubclass(options);
-      this.assertEquals(klass.associations, options.associations);
+    "subclass with hasMany association": new prod.Suite('subclass with hasMany association', {
+      setUp: function() {
+        this.setModel = sinon.spy();
+        this.options = {
+          associations: {
+            bars: {type: 'hasMany', setModel: this.setModel}
+          }
+        };
+        this.klass = newSubclass(this.options);
+      },
 
-      var foo = new klass();
-      var bars = foo.getBars();
-    },
+      "associations property": function() {
+        this.assertEquals(this.klass.associations, this.options.associations);
+      },
+
+      "association getter": function() {
+        var foo = new this.klass();
+        var bars = foo.getBars();
+        this.assertSame(bars, foo.getBars());
+      }
+    }),
 
     "subclass with hasOne association": function() {
       var modelConstructor = function() { };
