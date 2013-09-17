@@ -29,6 +29,15 @@ ave.clearProperties = function(object) {
     }
   }
 };
+
+ave.instantiateModel = function(modelClass, attributes) {
+  var model = new modelClass();
+  for (key in attributes) {
+    var method = 'set' + ave.camelize(key);
+    model[method].call(model, attributes[key]);
+  }
+  return model;
+};
 maria.ElementView.subclass(ave, 'InputView', {
   constructor: function() {
     maria.ElementView.apply(this, arguments);
