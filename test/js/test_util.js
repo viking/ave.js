@@ -48,26 +48,52 @@ define([
       this.assertEquals('undefined', typeof(obj.bar));
     },
 
-    "arraysEqual": new prod.Suite("arraysEqual", {
+    "deepEqual": new prod.Suite("deepEqual", {
+      "string equality": function() {
+        this.assert(ave.deepEqual('foo', 'foo'));
+        this.refute(ave.deepEqual('bar', 'foo'));
+      },
+
+      "number equality": function() {
+        this.assert(ave.deepEqual(123, 123));
+        this.refute(ave.deepEqual(123, 456));
+      },
+
       "arrays are equal when they're the same object": function() {
         var x = [];
-        this.assert(ave.arraysEqual(x, x));
+        this.assert(ave.deepEqual(x, x));
       },
 
       "arrays are not equal if one array is null": function() {
-        this.refute(ave.arraysEqual(null, []));
+        this.refute(ave.deepEqual(null, []));
       },
 
       "arrays are not equal if they are different lengths": function() {
-        this.refute(ave.arraysEqual([], ['foo']));
+        this.refute(ave.deepEqual([], ['foo']));
       },
 
       "arrays are equal if they contain equal data": function() {
-        this.assert(ave.arraysEqual(['foo'], ['foo']));
+        this.assert(ave.deepEqual(['foo'], ['foo']));
       },
 
       "arrays are not equal if they contain inequal data": function() {
-        this.refute(ave.arraysEqual(['foo'], ['bar']));
+        this.refute(ave.deepEqual(['foo'], ['bar']));
+      },
+
+      "objects are equal if they contain equal properties and values": function() {
+        this.assert(ave.deepEqual({foo: 123}, {foo: 123}))
+      },
+
+      "objects are not equal if they contain inequal values": function() {
+        this.refute(ave.deepEqual({foo: 123}, {foo: 456}))
+      },
+
+      "objects are not equal if first has more properties": function() {
+        this.refute(ave.deepEqual({foo: 123, bar: 456}, {foo: 123}))
+      },
+
+      "objects are not equal if second has more properties": function() {
+        this.refute(ave.deepEqual({foo: 123}, {foo: 123, bar: 456}))
       }
     }),
   });
