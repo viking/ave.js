@@ -9,7 +9,13 @@ define([
 
   function newModelSubclass(options) {
     var namespace = {};
-    Model.subclass(namespace, 'FooModel', options);
+    var opts = {
+      attributeNames: ['id', 'foo']
+    };
+    if (typeof(options) == 'object') {
+      maria.borrow(opts, options);
+    }
+    Model.subclass(namespace, 'FooModel', opts);
     return namespace.FooModel;
   }
 
@@ -66,6 +72,44 @@ define([
       setModel.add(child);
       setModel.isValid();
       this.assertCalled(setModel.validatesChild, 1);
-    })
+    }),
+
+    "sets id on add": function() {
+      var child = new this.modelClass();
+      sinon.stub(child, 'setId');
+      var klass = newSetModelSubclass()
+      var setModel = new klass();
+      setModel.add(child);
+      this.assertCalledWith(child.setId, 1);
+    },
+
+    "sets id on multiple add": function() {
+      var child_1 = new this.modelClass();
+      sinon.stub(child_1, 'setId');
+      var child_2 = new this.modelClass();
+      sinon.stub(child_2, 'setId');
+
+      var klass = newSetModelSubclass()
+      var setModel = new klass();
+      setModel.add(child_1, child_2);
+      this.assertCalledWith(child_1.setId, 1);
+      this.assertCalledWith(child_2.setId, 2);
+    },
+
+    "doesn't reuse id": function() {
+      var child_1 = new this.modelClass();
+      sinon.stub(child_1, 'setId');
+      var child_2 = new this.modelClass();
+      sinon.stub(child_2, 'setId');
+
+      var klass = newSetModelSubclass()
+      var setModel = new klass();
+      setModel.add(child_1);
+      this.assertCalledWith(child_1.setId, 1);
+      setModel.delete(child_1);
+
+      setModel.add(child_2);
+      this.assertCalledWith(child_2.setId, 2);
+    }
   });
 });

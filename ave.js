@@ -398,6 +398,7 @@ maria.SetModel.subclass(ave, 'SetModel', {
     maria.SetModel.apply(this, arguments);
     ave.ValidationHelper.apply(this);
     maria.on(this, 'change', this);
+    this._nextId = 1;
   },
 
   properties: {
@@ -430,16 +431,19 @@ maria.SetModel.subclass(ave, 'SetModel', {
         this.validatesChild(evt.target);
       }
       else if (evt.type == 'change' && evt.target === this) {
-        // start listening to validate events for added targets
         for (var i = 0; i < evt.addedTargets.length; i++) {
-          var field = evt.addedTargets[i];
-          maria.on(field, 'validate', this);
+          var model = evt.addedTargets[i];
+
+          // start listening to validate events for added targets
+          maria.on(model, 'validate', this);
+          model.setId(this._nextId++);
         }
 
-        // stop listening to validate events for removed targets
         for (var i = 0; i < evt.deletedTargets.length; i++) {
-          var field = evt.deletedTargets[i];
-          maria.off(field, 'validate', this);
+          var model = evt.deletedTargets[i];
+
+          // stop listening to validate events for removed targets
+          maria.off(model, 'validate', this);
         }
       }
     }
