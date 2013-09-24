@@ -52,7 +52,7 @@ define([
 
     "get checkbox value": function() {
       var elt = this.view.find('input.garply');
-      elt.setAttribute('checked', 'checked');
+      elt.checked = true;
       var values = this.view.getValues();
       this.assertSame(true, values.garply);
     },
@@ -65,14 +65,14 @@ define([
       var textarea = this.view.find('textarea');
       textarea.value = 'junk';
       var checkbox = this.view.find('input.garply');
-      checkbox.setAttribute('checked', 'checked');
+      checkbox.checked = true;
 
       this.view.reset();
       this.assertEquals(inputs[0].value, '');
       this.assertEquals(inputs[2].value, 'foo');
       this.assertEquals(select.selectedIndex, 0);
       this.assertEquals(textarea.value, '');
-      this.refute(checkbox.hasAttribute('checked'));
+      this.refute(checkbox.checked);
       this.assertEquals(this.view.find('input.submit').value, "Go");
       this.assertEquals(this.view.find('input.button').value, "Stop");
     },

@@ -28,12 +28,7 @@ maria.ElementView.subclass(ave, 'InputView', {
           }
           else {
             if (element.getAttribute('type') == 'checkbox') {
-              if (this._savedValues[name]) {
-                element.setAttribute('checked', 'checked');
-              }
-              else {
-                element.removeAttribute('checked');
-              }
+              element.checked = this._savedValues[name];
             }
             else {
               element.value = this._savedValues[name];
@@ -100,7 +95,7 @@ maria.ElementView.subclass(ave, 'InputView', {
           }
           else {
             if (element.getAttribute('type') == 'checkbox') {
-              values[name] = element.hasAttribute('checked');
+              values[name] = element.checked;
             }
             else {
               values[name] = element.value;
