@@ -37,7 +37,7 @@ fs.readFile(templatePath, { encoding: 'utf8' }, function(err, data) {
 
   var lines = data.split(/\r\n|\r|\n/);
   var code = [];
-  if (lines.length == 0) {
+  if (lines.length == 0 || (lines.length == 1 && lines[0] == '')) {
     code.push('""');
   }
   else {
