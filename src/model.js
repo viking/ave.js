@@ -117,6 +117,7 @@ ave.Model.subclass = function(namespace, name, options) {
             properties[getterName] = function() {
               if (!this[variableName]) {
                 this[variableName] = new setModel();
+                this[variableName].parentNode = this;
               }
               return this[variableName];
             }

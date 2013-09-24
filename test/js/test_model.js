@@ -120,6 +120,12 @@ define([
 
         var errors = foo.getErrors();
         this.assertEquals('is invalid', errors['bars'][0]);
+      }),
+
+      "parent node": sinon.test(function() {
+        var foo = new this.klass();
+        var bars = foo.getBars();
+        this.assertSame(foo, bars.parentNode);
       })
     }),
 

@@ -339,6 +339,7 @@ ave.Model.subclass = function(namespace, name, options) {
             properties[getterName] = function() {
               if (!this[variableName]) {
                 this[variableName] = new setModel();
+                this[variableName].parentNode = this;
               }
               return this[variableName];
             }
@@ -437,6 +438,7 @@ maria.SetModel.subclass(ave, 'SetModel', {
           // start listening to validate events for added targets
           maria.on(model, 'validate', this);
           model.setId(this._nextId++);
+          model.parentNode = this;
         }
 
         for (var i = 0; i < evt.deletedTargets.length; i++) {

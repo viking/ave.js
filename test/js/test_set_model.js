@@ -110,6 +110,14 @@ define([
 
       setModel.add(child_2);
       this.assertCalledWith(child_2.setId, 2);
-    }
+    },
+
+    "sets parentNode on add": function() {
+      var child = new this.modelClass();
+      var klass = newSetModelSubclass()
+      var setModel = new klass();
+      setModel.add(child);
+      this.assertSame(setModel, child.parentNode);
+    },
   });
 });
