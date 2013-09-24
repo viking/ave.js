@@ -27,7 +27,17 @@ maria.ElementView.subclass(ave, 'InputView', {
             element.selectedIndex = this._savedValues[name];
           }
           else {
-            element.value = this._savedValues[name];
+            if (element.getAttribute('type') == 'checkbox') {
+              if (this._savedValues[name]) {
+                element.setAttribute('checked', 'checked');
+              }
+              else {
+                element.removeAttribute('checked');
+              }
+            }
+            else {
+              element.value = this._savedValues[name];
+            }
           }
           this._removeErrorClass(element);
         }
@@ -89,7 +99,12 @@ maria.ElementView.subclass(ave, 'InputView', {
             }
           }
           else {
-            values[name] = element.value;
+            if (element.getAttribute('type') == 'checkbox') {
+              values[name] = element.hasAttribute('checked');
+            }
+            else {
+              values[name] = element.value;
+            }
           }
         }
       }

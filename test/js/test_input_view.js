@@ -23,6 +23,7 @@ define([
               '<option>corge</option>' +
             '</select>' +
             '<textarea name="grault"></textarea>' +
+            '<input class="garply" name="garply" type="checkbox"/>' +
             '<input class="submit" type="submit" value="Go"/>' +
             '<input class="button" type="button" value="Stop"/>' +
           '</div>'
@@ -39,7 +40,7 @@ define([
       this.view.find('textarea').value = "stuff goes here";
       this.assertEquals(this.view.getValues(), {
         foo: 'foo', bar: 'bar', blargh: 'stuff', baz: 'corge',
-        grault: 'stuff goes here'
+        grault: 'stuff goes here', garply: false
       });
     },
 
@@ -49,6 +50,13 @@ define([
       this.assertEquals(values.baz, null);
     },
 
+    "get checkbox value": function() {
+      var elt = this.view.find('input.garply');
+      elt.setAttribute('checked', 'checked');
+      var values = this.view.getValues();
+      this.assertSame(true, values.garply);
+    },
+
     "reset": function() {
       var inputs = this.view.findAll('input');
       inputs[0].value = 'foo';
@@ -56,12 +64,15 @@ define([
       select.selectedIndex = 1;
       var textarea = this.view.find('textarea');
       textarea.value = 'junk';
+      var checkbox = this.view.find('input.garply');
+      checkbox.setAttribute('checked', 'checked');
 
       this.view.reset();
       this.assertEquals(inputs[0].value, '');
       this.assertEquals(inputs[2].value, 'foo');
       this.assertEquals(select.selectedIndex, 0);
       this.assertEquals(textarea.value, '');
+      this.refute(checkbox.hasAttribute('checked'));
       this.assertEquals(this.view.find('input.submit').value, "Go");
       this.assertEquals(this.view.find('input.button').value, "Stop");
     },
