@@ -119,5 +119,12 @@ define([
       setModel.add(child);
       this.assertSame(setModel, child.parentNode);
     },
+
+    "modelConstructor property": function() {
+      var setModelClass = newSetModelClass({
+        modelConstructor: this.modelClass
+      });
+      this.assertSame(this.modelClass, setModelClass.modelConstructor);
+    }
   });
 });

@@ -64,6 +64,9 @@ for (var key in ave.ValidationHelper.prototype) {
   }
 }
 
-ave.SetModel.subclass = function() {
+ave.SetModel.subclass = function(namespace, name, options) {
   ave.Model.subclass.apply(this, arguments);
+  if (options && options.modelConstructor) {
+    namespace[name].modelConstructor = options.modelConstructor;
+  }
 };
