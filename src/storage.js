@@ -1,235 +1,55 @@
-ave.StorageSetModelProxy = function(store, collectionName, setModel, options) {
-  this._store = store;
-  this._collectionName = collectionName;
-  this._setModel = setModel;
-  this._options = options;
-}
+maria.Model.subclass(ave, 'Storage', {
+  constructor: function() {
+    maria.Model.apply(this, arguments);
+    this._collections = {};
+  },
 
-ave.StorageSetModelProxy.prototype.getSetModel = function() {
-  return this._setModel;
-};
-
-ave.StorageSetModelProxy.prototype.handleEvent = function(evt) {
-  if (evt.type != "change") {
-    return;
-  }
-
-  if (evt.addedTargets) {
-    evt.addedTargets.map(function(model) {
-      this._store.create(this._collectionName, model, this._options);
-    }, this);
-  }
-};
-
-ave.Storage = function() {
-  this._setModelProxies = {};
-};
-
-ave.Storage.prototype.getCollection = function(name, callback) {
-  var self = this;
-  setTimeout(function() {
-    callback(self._getCollection(name));
-  }, 0);
-};
-
-ave.Storage.prototype.create = function(collectionName, model, options) {
-  if (!model.isValid()) {
-    if (options.failure) {
-      options.failure("model is invalid");
-    }
-    return;
-  }
-  if (!model.getAttributes().id) {
-    if (options.failure) {
-      options.failure("model doesn't have an id");
-    }
-    return;
-  }
-
-  var self = this;
-  setTimeout(function() {
-    self._create.call(self, collectionName, model, options);
-  }, 0);
-};
-
-ave.Storage.prototype.update = function(collectionName, model, options) {
-  if (!model.isValid()) {
-    if (options.failure) {
-      options.failure("model is invalid");
-    }
-    return;
-  }
-  if (!model.getAttributes().id) {
-    if (options.failure) {
-      options.failure("model doesn't have an id");
-    }
-    return;
-  }
-
-  var self = this;
-  setTimeout(function() {
-    self._update.call(self, collectionName, model, options);
-  }, 0);
-};
-
-ave.Storage.prototype.addSetModel = function(collectionName, setModel, options) {
-  var proxy = new ave.StorageSetModelProxy(this, collectionName, setModel, options);
-  maria.on(setModel, 'change', proxy);
-
-  var proxies = this._setModelProxies[collectionName];
-  if (!proxies) {
-    proxies = this._setModelProxies[collectionName] = [];
-  }
-  proxies.push(proxy);
-}
-
-ave.Storage.prototype.removeSetModel = function(collectionName, setModel) {
-  var proxies = this._setModelProxies[collectionName];
-  if (proxies) {
-    proxies.map(function(proxy) {
-      var model = proxy.getSetModel();
-      if (model === setModel) {
-        maria.off(setModel, 'change', proxy);
+  properties: {
+    getBackend: function() {
+      if (typeof(this._backend) == "undefined") {
+        this._backend = localStorage;
       }
-    });
-  }
-}
-
-ave.Storage.prototype.findAll = function(collectionName, setModel, modelConstructor, options) {
-  var self = this;
-  setTimeout(function() {
-    self._findAll.call(self, collectionName, setModel, modelConstructor, options);
-  }, 0);
-}
-
-ave.Storage.prototype.find = function(collectionName, id, modelConstructor, options) {
-  var self = this;
-  setTimeout(function() {
-    self._find.call(self, collectionName, id, modelConstructor, options);
-  }, 0);
-}
-
-ave.Storage.prototype._create = function(collectionName, model, options) {
-  var attributes = model.getAttributes();
-  var self = this;
-  this._find(collectionName, attributes.id, null, {
-    success: function(record) {
-      // record already exists
-      if (options && options.failure) {
-        options.failure("model id already exists");
-      }
+      return this._backend;
     },
-    failure: function() {
-      var collection = self._getCollection(collectionName),
-          record = {},
-          name;
 
-      for (name in attributes) {
-        record[name] = attributes[name];
-      }
-      collection.push(record);
-      self._setCollection(collectionName, collection);
+    setBackend: function(backend) {
+      this._backend = backend;
+    },
 
-      if (options && options.success) {
-        options.success();
-      }
-    }
-  });
-};
-
-ave.Storage.prototype._update = function(collectionName, model, options) {
-  var collection = this._getCollection(collectionName);
-
-  var attributes = model.getAttributes();
-
-  /* find existing record */
-  var record;
-  for (var i = 0; i < collection.length; i++) {
-    if (collection[i].id == attributes.id) {
-      record = collection[i];
-      break;
-    }
-  }
-  if (!record) {
-    if (options && options.failure) {
-      options.failure("record not found");
-    }
-    return;
-  }
-
-  var name;
-  for (name in attributes) {
-    record[name] = attributes[name];
-  }
-  this._setCollection(collectionName, collection);
-
-  if (options && options.success) {
-    options.success();
-  }
-};
-
-ave.Storage.prototype._getCollection = function(name) {
-  var collection;
-  if (typeof(localStorage[name]) == 'undefined') {
-    collection = [];
-  }
-  else {
-    collection = JSON.parse(localStorage[name]);
-  }
-  return collection;
-};
-
-ave.Storage.prototype._setCollection = function(name, collection) {
-  localStorage[name] = JSON.stringify(collection);
-};
-
-ave.Storage.prototype._findAll = function(collectionName, setModel, modelConstructor, options) {
-  var collection = this._getCollection(collectionName);
-  var models = [];
-  for (var i = 0; i < collection.length; i++) {
-    var ok = true;
-    var record = collection[i];
-    if (options.filter) {
-      for (fkey in options.filter) {
-        if (record[fkey] != options.filter[fkey]) {
-          ok = false;
-          break;
-        }
-      }
-    }
-    if (ok) {
-      var model = ave.instantiateModel(modelConstructor, record);
-      models.push(model);
-    }
-  }
-  setModel.add.apply(setModel, models);
-  if (options.success) {
-    options.success();
-  }
-};
-
-ave.Storage.prototype._find = function(collectionName, id, modelConstructor, options) {
-  var collection = this._getCollection(collectionName);
-  var data;
-  for (var i = 0; i < collection.length; i++) {
-    var record = collection[i];
-    if (record.id == id) {
-      if (modelConstructor) {
-        data = ave.instantiateModel(modelConstructor, record);
+    register: function(collectionName, setModelConstructor) {
+      var backend = this.getBackend();
+      var setModel;
+      if (collectionName in backend) {
+        setModel = setModelConstructor.fromJSON(backend[collectionName]);
       }
       else {
-        data = record;
       }
-      break;
-    }
-  }
 
-  if (data) {
-    if (options.success) {
-      options.success(data);
+      var self = this;
+      maria.on(setModel, 'change', function(evt) {
+        self._update(collectionName);
+      });
+
+      this._collections[collectionName] = {
+        setModel: setModel,
+        modelConstructor: setModelConstructor.modelConstructor
+      };
+    },
+
+    getCollection: function(collectionName) {
+      return this._collections[collectionName].setModel;
+    },
+
+    _update: function(collectionName) {
+      var data = [];
+      this._collections[collectionName].setModel.forEach(function(model) {
+        data.push(model.getAttributes());
+      }, this);
+
+      var backend = this.getBackend();
+      backend[collectionName] = JSON.stringify(data);
+
+      this.dispatchEvent({type: 'change', collectionName: collectionName});
     }
   }
-  else if (options.failure) {
-    options.failure();
-  }
-};
+});
