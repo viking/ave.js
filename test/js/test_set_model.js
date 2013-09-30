@@ -124,7 +124,8 @@ define([
       var setModelClass = newSetModelClass({
         modelConstructor: this.modelClass
       });
-      this.assertSame(this.modelClass, setModelClass.modelConstructor);
+      var setModel = new setModelClass();
+      this.assertSame(this.modelClass, setModel._modelConstructor);
     },
 
     "toJSON": function() {

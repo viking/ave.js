@@ -436,11 +436,26 @@ maria.SetModel.subclass(ave, 'SetModel', {
 
   properties: {
     toJSON: function() {
+      return JSON.stringify(this.dump());
+    },
+
+    load: function(data) {
+      this._loading = true;
+      for (var i = 0; i < data.models.length; i++) {
+        var model = new this._modelConstructor();
+        model.load(data.models[i]);
+        this.add(model);
+      }
+      this._loading = false;
+      this._nextId = data._nextId;
+    },
+
+    dump: function() {
       var data = {models: [], _nextId: this._nextId};
       this.forEach(function(model) {
         data.models.push(model.dump());
       });
-      return JSON.stringify(data);
+      return data;
     },
 
     validate: function() {
@@ -505,23 +520,17 @@ for (var key in ave.ValidationHelper.prototype) {
 ave.SetModel.fromJSON = function(json) {
   var data = JSON.parse(json);
   var setModel = new this();
-  setModel._loading = true;
-  for (var i = 0; i < data.models.length; i++) {
-    var model = new this.modelConstructor();
-    model.load(data.models[i]);
-    setModel.add(model);
-  }
-  setModel._loading = false;
-  setModel._nextId = data._nextId;
+  setModel.load(data);
   return setModel;
 };
 
 ave.SetModel.subclass = function(namespace, name, options) {
+  if (options && options.modelConstructor) {
+    var properties = options.properties || (options.properties = {});
+    properties._modelConstructor = options.modelConstructor;
+  }
   ave.Model.subclass.apply(this, arguments);
   namespace[name].fromJSON = ave.SetModel.fromJSON;
-  if (options && options.modelConstructor) {
-    namespace[name].modelConstructor = options.modelConstructor;
-  }
 };
 maria.Model.subclass(ave, 'Storage', {
   constructor: function() {
