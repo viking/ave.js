@@ -5,32 +5,39 @@ define([
   'ave'
 ], function(prod, sinon, maria, ave) {
   var Model = ave.Model;
+  var SetModel = ave.SetModel;
 
-  function newSubclass(options) {
+  function newModelClass(options) {
     var namespace = {};
     Model.subclass(namespace, 'FooModel', options);
     return namespace.FooModel;
   }
 
+  function newSetModelClass(options) {
+    var namespace = {};
+    SetModel.subclass(namespace, 'FoosModel', options);
+    return namespace.FoosModel;
+  }
+
   return new prod.Suite('Model', {
     "setAttribute": function() {
-      var klass = newSubclass();
-      var model = new klass();
+      var modelClass = newModelClass();
+      var model = new modelClass();
       model.setAttribute('foo', 123);
       this.assertEquals(model.getAttributes(), {foo: 123})
       this.assertEquals(model.getAttribute('foo'), 123)
     },
 
     "setAttributes": function() {
-      var klass = newSubclass();
-      var model = new klass();
+      var modelClass = newModelClass();
+      var model = new modelClass();
       model.setAttributes({foo: 123, bar: 'baz'});
       this.assertEquals(model.getAttributes(), {foo: 123, bar: 'baz'})
     },
 
     "setAttribute triggers change event": function() {
-      var klass = newSubclass();
-      var model = new klass();
+      var modelClass = newModelClass();
+      var model = new modelClass();
       var spy = sinon.spy();
       maria.on(model, "change", spy);
 
@@ -39,8 +46,8 @@ define([
     },
 
     "setAttribute doesn't trigger change event for same value": function() {
-      var klass = newSubclass();
-      var model = new klass();
+      var modelClass = newModelClass();
+      var model = new modelClass();
       model.setAttribute("foo", 123);
 
       var spy = sinon.spy();
@@ -50,8 +57,8 @@ define([
     },
 
     "setAttribute doesn't trigger change event for same equal value": function() {
-      var klass = newSubclass();
-      var model = new klass();
+      var modelClass = newModelClass();
+      var model = new modelClass();
       model.setAttribute("foo", [123]);
 
       var spy = sinon.spy();
@@ -61,8 +68,8 @@ define([
     },
 
     "setAttributes triggers change event once": function() {
-      var klass = newSubclass();
-      var model = new klass();
+      var modelClass = newModelClass();
+      var model = new modelClass();
       var spy = sinon.spy();
       maria.on(model, "change", spy);
 
@@ -71,8 +78,8 @@ define([
     },
 
     "setAttributes doesn't trigger change event for same value": function() {
-      var klass = newSubclass();
-      var model = new klass();
+      var modelClass = newModelClass();
+      var model = new modelClass();
       model.setAttributes({foo: 123, bar: 'baz'});
 
       var spy = sinon.spy();
@@ -82,75 +89,102 @@ define([
     },
 
     "entityName": function() {
-      var klass = newSubclass({
+      var modelClass = newModelClass({
         entityName: 'foo'
       });
-      this.assertEquals(klass.entityName, "foo");
+      this.assertEquals(modelClass.entityName, "foo");
     },
 
     "collectionName": function() {
-      var klass = newSubclass({
+      var modelClass = newModelClass({
         collectionName: 'foos'
       });
-      this.assertEquals(klass.collectionName, "foos");
+      this.assertEquals(modelClass.collectionName, "foos");
     },
 
     "subclass with hasMany association": new prod.Suite('subclass with hasMany association', {
       setUp: function() {
-        this.setModel = sinon.spy();
+        this.subModelClass = newModelClass({
+          attributeNames: ['id', 'name']
+        });
+        this.setModelClass = newSetModelClass({
+          modelConstructor: this.subModelClass
+        });
+
         this.options = {
+          attributeNames: ['id', 'name'],
           associations: {
-            bars: {type: 'hasMany', setModel: this.setModel}
+            bars: {type: 'hasMany', constructor: this.setModelClass}
           }
         };
-        this.klass = newSubclass(this.options);
+        this.modelClass = newModelClass(this.options);
       },
 
       "association getter": function() {
-        var foo = new this.klass();
+        var foo = new this.modelClass();
         var bars = foo.getBars();
         this.assertSame(bars, foo.getBars());
       },
 
-      "validate association": sinon.test(function() {
-        var foo = new this.klass();
+      "validate association": function() {
+        var foo = new this.modelClass();
         var bars = foo.getBars();
-        bars.isValid = sinon.stub().returns(false);
+        sinon.stub(bars, 'isValid').returns(false);
         this.refute(foo.isValid(), 'expected foo to be invalid');
 
         var errors = foo.getErrors();
-        this.assertEquals('is invalid', errors['bars'][0]);
-      }),
+        this.assertEquals('is invalid', errors['bars'][0], 'wrong error message');
+      },
 
-      "parent node": sinon.test(function() {
-        var foo = new this.klass();
+      "parent node": function() {
+        var foo = new this.modelClass();
         var bars = foo.getBars();
         this.assertSame(foo, bars.parentNode);
-      })
+      },
+
+      // integration test
+      "json round trip": function() {
+        var foo = new this.modelClass();
+        foo.setId(1);
+        foo.setName("foo");
+        var bars = foo.getBars();
+        var bar = new this.subModelClass();
+        bar.setName("bar");
+        bars.add(bar);
+
+        var foo2 = this.modelClass.fromJSON(foo.toJSON());
+        this.assertEquals(1, foo2.getId());
+        this.assertEquals("foo", foo2.getName());
+        var bars2 = foo2.getBars();
+        this.assertEquals(1, bars2.size);
+      },
     }),
 
     "subclass with hasOne association": new prod.Suite('subclass with hasOne association', {
       setUp: function() {
-        this.modelConstructor = function() { };
+        this.subModelClass = newModelClass({
+          attributeNames: ['id', 'name']
+        });
         this.options = {
+          attributeNames: ['id', 'name'],
           associations: {
-            bar: {type: 'hasOne', modelConstructor: this.modelConstructor}
+            bar: {type: 'hasOne', constructor: this.subModelClass}
           }
         };
-        this.klass = newSubclass(this.options);
+        this.modelClass = newModelClass(this.options);
       },
 
       "association accessors": function() {
-        var foo = new this.klass();
+        var foo = new this.modelClass();
         this.assertEquals(foo.getBar(), null);
 
-        var bar = new this.modelConstructor();
+        var bar = new this.subModelClass();
         foo.setBar(bar);
         this.assertSame(foo.getBar(), bar);
       },
 
       "setter requires proper class": function() {
-        var foo = new this.klass();
+        var foo = new this.modelClass();
 
         var obj = new (function() {})();
         this.assertException(function() {
@@ -159,50 +193,66 @@ define([
       },
 
       "validate association": sinon.test(function() {
-        var foo = new this.klass();
-        var bar = new this.modelConstructor();
+        var foo = new this.modelClass();
+        var bar = new this.subModelClass();
         foo.setBar(bar);
-        bar.isValid = sinon.stub().returns(false);
+        sinon.stub(bar, 'isValid').returns(false);
         this.refute(foo.isValid(), 'expected foo to be invalid');
 
         var errors = foo.getErrors();
         this.assertEquals('is invalid', errors['bar'][0]);
-      })
+      }),
+
+      // integration test
+      "json round trip": function() {
+        var foo = new this.modelClass();
+        foo.setId(1);
+        foo.setName("foo");
+        var bar = new this.subModelClass();
+        bar.setName("bar");
+        foo.setBar(bar);
+
+        var foo2 = this.modelClass.fromJSON(foo.toJSON());
+        this.assertEquals(1, foo2.getId());
+        this.assertEquals("foo", foo2.getName());
+        var bar2 = foo2.getBar();
+        this.assertEquals("bar", bar2.getName());
+      },
     }),
 
     "attribute names": function() {
-      var klass = newSubclass({
+      var modelClass = newModelClass({
         attributeNames: ['id', 'name', 'project_id']
       });
-      var model = new klass();
+      var model = new modelClass();
       this.assertEquals(model.getAttributes(), {id: null, name: null, project_id: null});
     },
 
     "set invalid attribute": function() {
-      var klass = newSubclass({
+      var modelClass = newModelClass({
         attributeNames: ['id', 'name', 'project_id']
       });
-      var model = new klass();
+      var model = new modelClass();
       this.assertException(function() {
         model.setAttribute('foo', 123);
       });
     },
 
     "get invalid attribute": function() {
-      var klass = newSubclass({
+      var modelClass = newModelClass({
         attributeNames: ['id', 'name', 'project_id']
       });
-      var model = new klass();
+      var model = new modelClass();
       this.assertException(function() {
         model.getAttribute('foo');
       });
     },
 
     "attribute helpers": function() {
-      var klass = newSubclass({
+      var modelClass = newModelClass({
         attributeNames: ['id', 'name', 'project_id']
       });
-      var model = new klass();
+      var model = new modelClass();
       model.setId(123);
       this.assertEquals(model.getId(), 123);
       model.setName('foo');
@@ -213,14 +263,14 @@ define([
 
     "validate presence": function() {
       var result;
-      var klass = newSubclass({
+      var modelClass = newModelClass({
         properties: {
           validate: function() {
             result = this.validatesPresence('foo');
           }
         }
       });
-      var model = new klass();
+      var model = new modelClass();
       this.refute(model.isValid());
       this.refute(result);
       this.assertEquals(model.getErrors(), {foo: ['is required']});
@@ -231,14 +281,14 @@ define([
 
     "validate presence rejects empty string": function() {
       var result;
-      var klass = newSubclass({
+      var modelClass = newModelClass({
         properties: {
           validate: function() {
             result = this.validatesPresence('foo');
           }
         }
       });
-      var model = new klass();
+      var model = new modelClass();
       model.setAttribute('foo', '');
       this.refute(model.isValid());
       this.refute(result);
@@ -250,14 +300,14 @@ define([
 
     "validate type": function() {
       var result;
-      var klass = newSubclass({
+      var modelClass = newModelClass({
         properties: {
           validate: function() {
             result = this.validatesType('foo', 'number');
           }
         }
       });
-      var model = new klass();
+      var model = new modelClass();
       model.setAttribute('foo', 'bar');
       this.refute(model.isValid());
       this.refute(result);
@@ -267,8 +317,8 @@ define([
     },
 
     "dispatch validate event": function() {
-      var klass = newSubclass();
-      var model = new klass();
+      var modelClass = newModelClass();
+      var model = new modelClass();
       maria.on(model, 'validate', function(evt) {
         var m = evt.target;
         m.addError('foo');
@@ -278,14 +328,14 @@ define([
 
     "validates format": function() {
       var result;
-      var klass = newSubclass({
+      var modelClass = newModelClass({
         properties: {
           validate: function() {
             result = this.validatesFormat('foo', /^\w+$/);
           }
         }
       });
-      var model = new klass();
+      var model = new modelClass();
       model.setAttribute('foo', 'bar baz');
       this.refute(model.isValid());
       this.refute(result);
@@ -301,20 +351,20 @@ define([
     },
 
     "toJSON": function() {
-      var klass = newSubclass({
+      var modelClass = newModelClass({
         attributeNames: ['id', 'name']
       });
-      var model = new klass();
+      var model = new modelClass();
       model.setId(1);
       model.setName('foo');
       this.assertEquals('{"id":1,"name":"foo"}', model.toJSON());
     },
 
     "fromJSON": function() {
-      var klass = newSubclass({
+      var modelClass = newModelClass({
         attributeNames: ['id', 'name']
       });
-      var model = klass.fromJSON('{"id":1,"name":"foo"}');
+      var model = modelClass.fromJSON('{"id":1,"name":"foo"}');
       this.assertEquals(1, model.getId());
       this.assertEquals('foo', model.getName());
     }

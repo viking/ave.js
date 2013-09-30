@@ -274,6 +274,15 @@ maria.Model.subclass(ave, 'Model', {
 
     load: function(data) {
       // override to control JSON unserialization
+      var name;
+      for (name in this._associations) {
+        var association = this._associations[name];
+        var obj = new association.constructor();
+        obj.load(data[name]);
+        this[association.propertyName] = obj;
+        delete(data[name]);
+      }
+
       this.setAttributes(data);
     },
 
@@ -290,7 +299,16 @@ maria.Model.subclass(ave, 'Model', {
 
     dump: function() {
       // override to control JSON serialization
-      return this._attributes;
+      var attributes = {};
+      maria.borrow(attributes, this._attributes);
+
+      var name;
+      for (name in this._associations) {
+        var association = this._associations[name];
+        var obj = this[association.getterName].call(this);
+        attributes[name] = obj.dump();
+      }
+      return attributes;
     },
 
     toJSON: function() {
@@ -298,9 +316,10 @@ maria.Model.subclass(ave, 'Model', {
     },
 
     validate: function() {
-      for (name in this.associationGetters) {
-        var getter = this.associationGetters[name];
-        var obj = this[getter].call(this);
+      var name;
+      for (name in this._associations) {
+        var association = this._associations[name];
+        var obj = this[association.getterName].call(this);
         if (!obj.isValid()) {
           this.addError(name, 'is invalid');
         }
@@ -354,45 +373,46 @@ ave.Model.fromJSON = function(json) {
 ave.Model.subclass = function(namespace, name, options) {
   options = options || {};
   var properties = options.properties || (options.properties = {});
-  properties.associationGetters = {};
+  properties.associations = {};
   if (options.associations) {
+    properties._associations = options.associations;
     for (var associationName in options.associations) {
-      var getterName = 'get' + ave.capitalize(associationName);
-      var variableName = '_' + associationName;
+      var getterName = 'get' + ave.camelize(associationName);
+      var propertyName = '_' + associationName;
       var config = options.associations[associationName];
-
-      properties.associationGetters[associationName] = getterName;
+      config.getterName = getterName;
+      config.propertyName = propertyName;
 
       switch (config.type) {
         case 'hasMany':
-          var setModel = config.setModel;
-          (function(variableName, setModel) {
+          var constructor = config.constructor;
+          (function(propertyName, constructor) {
             properties[getterName] = function() {
-              if (!this[variableName]) {
-                this[variableName] = new setModel();
-                this[variableName].parentNode = this;
+              if (!this[propertyName]) {
+                this[propertyName] = new constructor();
+                this[propertyName].parentNode = this;
               }
-              return this[variableName];
+              return this[propertyName];
             }
-          })(variableName, setModel);
+          })(propertyName, constructor);
           break;
         case 'hasOne':
           var setterName = 'set' + ave.capitalize(associationName);
-          var constructor = config.modelConstructor;
-          (function(variableName, constructor) {
+          var constructor = config.constructor;
+          (function(propertyName, constructor) {
             properties[getterName] = function() {
-              return this[variableName];
+              return this[propertyName];
             };
             properties[setterName] = function(model) {
               if (model instanceof constructor) {
-                this[variableName] = model;
+                this[propertyName] = model;
               }
               else {
                 throw("model is not an instance of the specified constructor");
               }
             };
-          })(variableName, constructor);
-          properties[variableName] = null;
+          })(propertyName, constructor);
+          properties[propertyName] = null;
           break;
       }
     }
