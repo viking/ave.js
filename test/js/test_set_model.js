@@ -7,7 +7,7 @@ define([
   var Model = ave.Model;
   var SetModel = ave.SetModel;
 
-  function newModelSubclass(options) {
+  function newModelClass(options) {
     var namespace = {};
     var opts = {
       attributeNames: ['id', 'foo']
@@ -19,7 +19,7 @@ define([
     return namespace.FooModel;
   }
 
-  function newSetModelSubclass(options) {
+  function newSetModelClass(options) {
     var namespace = {};
     SetModel.subclass(namespace, 'FoosModel', options);
     return namespace.FoosModel;
@@ -27,7 +27,7 @@ define([
 
   return new prod.Suite('SetModel', {
     setUp: function() {
-      this.modelClass = newModelSubclass();
+      this.modelClass = newModelClass();
     },
 
     "validates unique": function() {
@@ -36,8 +36,8 @@ define([
       var model_2 = new this.modelClass();
       model_2.setAttribute('foo', 'baz');
 
-      var klass = newSetModelSubclass();
-      var setModel = new klass();
+      var setModelClass = newSetModelClass();
+      var setModel = new setModelClass();
       setModel.add(model_1);
       setModel.add(model_2);
 
@@ -55,8 +55,8 @@ define([
       var child = new this.modelClass();
       sinon.stub(child, 'isValid').returns(false);
 
-      var klass = newSetModelSubclass();
-      var setModel = new klass();
+      var setModelClass = newSetModelClass();
+      var setModel = new setModelClass();
       setModel.add(child);
       this.refute(setModel.isValid());
 
@@ -66,8 +66,8 @@ define([
 
     "validatesChild is called for each child on validate": sinon.test(function() {
       var child = new this.modelClass();
-      var klass = newSetModelSubclass()
-      var setModel = new klass();
+      var setModelClass = newSetModelClass()
+      var setModel = new setModelClass();
       sinon.stub(setModel, 'validatesChild');
       setModel.add(child);
       setModel.isValid();
@@ -77,8 +77,8 @@ define([
     "sets id on add": function() {
       var child = new this.modelClass();
       sinon.stub(child, 'setId');
-      var klass = newSetModelSubclass()
-      var setModel = new klass();
+      var setModelClass = newSetModelClass()
+      var setModel = new setModelClass();
       setModel.add(child);
       this.assertCalledWith(child.setId, 1);
     },
@@ -89,8 +89,8 @@ define([
       var child_2 = new this.modelClass();
       sinon.stub(child_2, 'setId');
 
-      var klass = newSetModelSubclass()
-      var setModel = new klass();
+      var setModelClass = newSetModelClass()
+      var setModel = new setModelClass();
       setModel.add(child_1, child_2);
       this.assertCalledWith(child_1.setId, 1);
       this.assertCalledWith(child_2.setId, 2);
@@ -102,8 +102,8 @@ define([
       var child_2 = new this.modelClass();
       sinon.stub(child_2, 'setId');
 
-      var klass = newSetModelSubclass()
-      var setModel = new klass();
+      var setModelClass = newSetModelClass()
+      var setModel = new setModelClass();
       setModel.add(child_1);
       this.assertCalledWith(child_1.setId, 1);
       setModel.delete(child_1);
@@ -114,8 +114,8 @@ define([
 
     "sets parentNode on add": function() {
       var child = new this.modelClass();
-      var klass = newSetModelSubclass()
-      var setModel = new klass();
+      var setModelClass = newSetModelClass();
+      var setModel = new setModelClass();
       setModel.add(child);
       this.assertSame(setModel, child.parentNode);
     },
