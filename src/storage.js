@@ -95,17 +95,17 @@ ave.Storage.prototype.removeSetModel = function(collectionName, setModel) {
   }
 }
 
-ave.Storage.prototype.findAll = function(collectionName, setModel, modelClass, options) {
+ave.Storage.prototype.findAll = function(collectionName, setModel, modelConstructor, options) {
   var self = this;
   setTimeout(function() {
-    self._findAll.call(self, collectionName, setModel, modelClass, options);
+    self._findAll.call(self, collectionName, setModel, modelConstructor, options);
   }, 0);
 }
 
-ave.Storage.prototype.find = function(collectionName, id, modelClass, options) {
+ave.Storage.prototype.find = function(collectionName, id, modelConstructor, options) {
   var self = this;
   setTimeout(function() {
-    self._find.call(self, collectionName, id, modelClass, options);
+    self._find.call(self, collectionName, id, modelConstructor, options);
   }, 0);
 }
 
@@ -183,7 +183,7 @@ ave.Storage.prototype._setCollection = function(name, collection) {
   localStorage[name] = JSON.stringify(collection);
 };
 
-ave.Storage.prototype._findAll = function(collectionName, setModel, modelClass, options) {
+ave.Storage.prototype._findAll = function(collectionName, setModel, modelConstructor, options) {
   var collection = this._getCollection(collectionName);
   var models = [];
   for (var i = 0; i < collection.length; i++) {
@@ -198,7 +198,7 @@ ave.Storage.prototype._findAll = function(collectionName, setModel, modelClass, 
       }
     }
     if (ok) {
-      var model = ave.instantiateModel(modelClass, record);
+      var model = ave.instantiateModel(modelConstructor, record);
       models.push(model);
     }
   }
@@ -208,14 +208,14 @@ ave.Storage.prototype._findAll = function(collectionName, setModel, modelClass, 
   }
 };
 
-ave.Storage.prototype._find = function(collectionName, id, modelClass, options) {
+ave.Storage.prototype._find = function(collectionName, id, modelConstructor, options) {
   var collection = this._getCollection(collectionName);
   var data;
   for (var i = 0; i < collection.length; i++) {
     var record = collection[i];
     if (record.id == id) {
-      if (modelClass) {
-        data = ave.instantiateModel(modelClass, record);
+      if (modelConstructor) {
+        data = ave.instantiateModel(modelConstructor, record);
       }
       else {
         data = record;
