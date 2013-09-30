@@ -158,6 +158,20 @@ define([
         var bars2 = foo2.getBars();
         this.assertEquals(1, bars2.size);
       },
+
+      "event bubbling": function() {
+        var foo = new this.modelClass();
+        foo.setId(1);
+        foo.setName("foo");
+        var bars = foo.getBars();
+        var bar = new this.subModelClass();
+        bar.setName("bar");
+
+        var spy = sinon.spy();
+        maria.on(foo, 'change', spy);
+        bars.add(bar);
+        this.assertCalled(spy);
+      },
     }),
 
     "subclass with hasOne association": new prod.Suite('subclass with hasOne association', {
@@ -218,6 +232,50 @@ define([
         var bar2 = foo2.getBar();
         this.assertEquals("bar", bar2.getName());
       },
+
+      "event bubbling": function() {
+        var foo = new this.modelClass();
+        foo.setId(1);
+        foo.setName("foo");
+        var bar = new this.subModelClass();
+        bar.setName("bar");
+        foo.setBar(bar);
+
+        var spy = sinon.spy();
+        maria.on(foo, 'change', spy);
+        bar.setName("baz");
+        this.assertCalled(spy);
+      },
+
+      "no event bubbling for replaced child": function() {
+        var foo = new this.modelClass();
+        foo.setId(1);
+        foo.setName("foo");
+        var bar = new this.subModelClass();
+        bar.setName("bar");
+        foo.setBar(bar);
+        var bar2 = new this.subModelClass();
+        bar2.setName("baz");
+        foo.setBar(bar2);
+
+        var spy = sinon.spy();
+        maria.on(foo, 'change', spy);
+        bar.setName("junk");
+        this.assertCalled(spy, 0);
+      },
+
+      "using setter triggers change event": function() {
+        var foo = new this.modelClass();
+        foo.setId(1);
+        foo.setName("foo");
+        var bar = new this.subModelClass();
+        bar.setName("bar");
+
+        var spy = sinon.spy();
+        maria.on(foo, 'change', spy);
+        foo.setBar(bar);
+        this.assertCalled(spy);
+      }
     }),
 
     "attribute names": function() {

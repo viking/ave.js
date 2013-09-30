@@ -157,8 +157,10 @@ ave.Model.subclass = function(namespace, name, options) {
           (function(propertyName, constructor) {
             properties[getterName] = function() {
               if (!this[propertyName]) {
-                this[propertyName] = new constructor();
-                this[propertyName].parentNode = this;
+                var obj = new constructor()
+                obj.parentNode = this;
+                obj.addParentEventTarget(this);
+                this[propertyName] = obj;
               }
               return this[propertyName];
             }
@@ -173,7 +175,12 @@ ave.Model.subclass = function(namespace, name, options) {
             };
             properties[setterName] = function(model) {
               if (model instanceof constructor) {
+                if (this[propertyName]) {
+                  this[propertyName].removeParentEventTarget(this);
+                }
                 this[propertyName] = model;
+                model.addParentEventTarget(this);
+                this.dispatchEvent({type: 'change'});
               }
               else {
                 throw("model is not an instance of the specified constructor");
