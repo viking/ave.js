@@ -4,6 +4,7 @@ SOURCES = src/util.js \
 	  src/input_view.js \
 	  src/model.js \
 	  src/set_model.js \
+	  src/storage.js \
 	  src/router.js
 
 ave.js: $(SOURCES)
