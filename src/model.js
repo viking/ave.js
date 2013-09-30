@@ -40,6 +40,11 @@ maria.Model.subclass(ave, 'Model', {
       }
     },
 
+    load: function(data) {
+      // override to control JSON unserialization
+      this.setAttributes(data);
+    },
+
     getAttribute: function(name) {
       if (this._attributeNames && this._attributeNames.indexOf(name) < 0) {
         throw("invalid attribute: " + name);
@@ -51,8 +56,13 @@ maria.Model.subclass(ave, 'Model', {
       return this._attributes;
     },
 
+    dump: function() {
+      // override to control JSON serialization
+      return this._attributes;
+    },
+
     toJSON: function() {
-      return JSON.stringify(this._attributes);
+      return JSON.stringify(this.dump());
     },
 
     validate: function() {
@@ -105,7 +115,7 @@ for (var key in ave.ValidationHelper.prototype) {
 ave.Model.fromJSON = function(json) {
   var data = JSON.parse(json);
   var model = new this();
-  model.setAttributes(data);
+  model.load(data);
   return model;
 };
 
