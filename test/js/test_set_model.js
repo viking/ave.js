@@ -125,6 +125,42 @@ define([
         modelConstructor: this.modelClass
       });
       this.assertSame(this.modelClass, setModelClass.modelConstructor);
+    },
+
+    "toJSON": function() {
+      var modelClass = newModelClass({
+        attributeNames: ['id', 'name']
+      });
+      var setModelClass = newSetModelClass();
+
+      var model = new modelClass();
+      model.setName('foo');
+      var setModel = new setModelClass();
+      setModel.add(model);
+
+      this.assertEquals('{"models":[{"id":1,"name":"foo"}],"_nextId":2}', setModel.toJSON());
+    },
+
+    "fromJSON": function() {
+      var modelClass = newModelClass({
+        attributeNames: ['id', 'name']
+      });
+      var setModelClass = newSetModelClass({
+        modelConstructor: modelClass
+      });
+
+      var setModel = setModelClass.fromJSON('{"models":[{"id":2,"name":"foo"}],"_nextId":3}');
+      this.assertEquals(1, setModel.size);
+
+      setModel.forEach(function(model) {
+        this.assertEquals(2, model.getId());
+        this.assertEquals("foo", model.getName());
+      }, this);
+
+      var model = new modelClass();
+      model.setName("bar");
+      setModel.add(model);
+      this.assertEquals(3, model.getId());
     }
   });
 });

@@ -7,6 +7,14 @@ maria.SetModel.subclass(ave, 'SetModel', {
   },
 
   properties: {
+    toJSON: function() {
+      var data = {models: [], _nextId: this._nextId};
+      this.forEach(function(model) {
+        data.models.push(model.dump());
+      });
+      return JSON.stringify(data);
+    },
+
     validate: function() {
       var index = 0;
       this.forEach(function(model) {
@@ -41,8 +49,10 @@ maria.SetModel.subclass(ave, 'SetModel', {
 
           // start listening to validate events for added targets
           maria.on(model, 'validate', this);
-          model.setId(this._nextId++);
           model.parentNode = this;
+          if (!this._loading) {
+            model.setId(this._nextId++);
+          }
         }
 
         for (var i = 0; i < evt.deletedTargets.length; i++) {
@@ -64,8 +74,23 @@ for (var key in ave.ValidationHelper.prototype) {
   }
 }
 
+ave.SetModel.fromJSON = function(json) {
+  var data = JSON.parse(json);
+  var setModel = new this();
+  setModel._loading = true;
+  for (var i = 0; i < data.models.length; i++) {
+    var model = new this.modelConstructor();
+    model.load(data.models[i]);
+    setModel.add(model);
+  }
+  setModel._loading = false;
+  setModel._nextId = data._nextId;
+  return setModel;
+};
+
 ave.SetModel.subclass = function(namespace, name, options) {
   ave.Model.subclass.apply(this, arguments);
+  namespace[name].fromJSON = ave.SetModel.fromJSON;
   if (options && options.modelConstructor) {
     namespace[name].modelConstructor = options.modelConstructor;
   }
