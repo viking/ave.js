@@ -39,9 +39,10 @@ define([
 
       var model = new modelClass();
       model.setName('foo');
+      sinon.stub(setModel, 'toJSON').returns('foobar');
       setModel.add(model);
 
-      this.assertEquals([{id:1,name:'foo'}], JSON.parse(this.backend['foos']));
+      this.assertEquals('foobar', this.backend['foos']);
       this.assertCalled(spy);
 
       var evt = spy.getCall(0).args[0];

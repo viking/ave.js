@@ -42,13 +42,9 @@ maria.Model.subclass(ave, 'Storage', {
     },
 
     _update: function(collectionName) {
-      var data = [];
-      this._collections[collectionName].setModel.forEach(function(model) {
-        data.push(model.getAttributes());
-      }, this);
-
+      var setModel = this._collections[collectionName].setModel;
       var backend = this.getBackend();
-      backend[collectionName] = JSON.stringify(data);
+      backend[collectionName] = setModel.toJSON();
 
       this.dispatchEvent({type: 'change', collectionName: collectionName});
     }
