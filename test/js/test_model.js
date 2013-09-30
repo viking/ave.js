@@ -298,6 +298,25 @@ define([
       model.setAttribute('foo', 123);
       this.assert(model.isValid());
       this.assert(result);
+    },
+
+    "toJSON": function() {
+      var klass = newSubclass({
+        attributeNames: ['id', 'name']
+      });
+      var model = new klass();
+      model.setId(1);
+      model.setName('foo');
+      this.assertEquals('{"id":1,"name":"foo"}', model.toJSON());
+    },
+
+    "fromJSON": function() {
+      var klass = newSubclass({
+        attributeNames: ['id', 'name']
+      });
+      var model = klass.fromJSON('{"id":1,"name":"foo"}');
+      this.assertEquals(1, model.getId());
+      this.assertEquals('foo', model.getName());
     }
   });
 });

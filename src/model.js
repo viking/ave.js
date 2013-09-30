@@ -51,6 +51,10 @@ maria.Model.subclass(ave, 'Model', {
       return this._attributes;
     },
 
+    toJSON: function() {
+      return JSON.stringify(this._attributes);
+    },
+
     validate: function() {
       for (name in this.associationGetters) {
         var getter = this.associationGetters[name];
@@ -97,6 +101,13 @@ for (var key in ave.ValidationHelper.prototype) {
     }
   }
 }
+
+ave.Model.fromJSON = function(json) {
+  var data = JSON.parse(json);
+  var model = new this();
+  model.setAttributes(data);
+  return model;
+};
 
 ave.Model.subclass = function(namespace, name, options) {
   options = options || {};
@@ -164,6 +175,7 @@ ave.Model.subclass = function(namespace, name, options) {
   }
   maria.subclass.call(this, namespace, name, options);
   var klass = namespace[name];
+  klass.fromJSON = ave.Model.fromJSON;
 
   if (options.entityName) {
     klass.entityName = options.entityName;
