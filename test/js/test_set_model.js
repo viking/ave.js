@@ -74,6 +74,18 @@ define([
       this.assertCalled(setModel.validatesChild, 1);
     }),
 
+    "validate event doesn't bubble up": function() {
+      var child = new this.modelClass();
+      var setModelClass = newSetModelClass()
+      var setModel = new setModelClass();
+      setModel.add(child);
+
+      var spy = sinon.spy();
+      maria.on(setModel, 'validate', spy);
+      child.isValid();
+      this.assertCalled(spy, 0);
+    },
+
     "sets id on add": function() {
       var child = new this.modelClass();
       sinon.stub(child, 'setId');

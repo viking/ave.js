@@ -319,9 +319,11 @@ maria.Model.subclass(ave, 'Model', {
       var name;
       for (name in this._associations) {
         var association = this._associations[name];
-        var obj = this[association.getterName].call(this);
-        if (!obj.isValid()) {
-          this.addError(name, 'is invalid');
+        if (this.hasOwnProperty(association.propertyName)) {
+          var obj = this[association.getterName].call(this);
+          if (!obj.isValid()) {
+            this.addError(name, 'is invalid');
+          }
         }
       }
     },
@@ -511,6 +513,7 @@ maria.SetModel.subclass(ave, 'SetModel', {
 
     handleEvent: function(evt) {
       if (evt.type == 'validate') {
+        evt.stopPropagation();
         this.validatesChild(evt.target);
       }
       else if (evt.type == 'change' && evt.target === this) {

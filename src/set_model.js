@@ -56,6 +56,7 @@ maria.SetModel.subclass(ave, 'SetModel', {
 
     handleEvent: function(evt) {
       if (evt.type == 'validate') {
+        evt.stopPropagation();
         this.validatesChild(evt.target);
       }
       else if (evt.type == 'change' && evt.target === this) {

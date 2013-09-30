@@ -275,6 +275,13 @@ define([
         maria.on(foo, 'change', spy);
         foo.setBar(bar);
         this.assertCalled(spy);
+      },
+
+      "don't flip out during validation if associated value is null": function() {
+        var foo = new this.modelClass();
+        foo.setId(1);
+        foo.setName("foo");
+        this.assert(foo.isValid());
       }
     }),
 

@@ -87,9 +87,11 @@ maria.Model.subclass(ave, 'Model', {
       var name;
       for (name in this._associations) {
         var association = this._associations[name];
-        var obj = this[association.getterName].call(this);
-        if (!obj.isValid()) {
-          this.addError(name, 'is invalid');
+        if (this.hasOwnProperty(association.propertyName)) {
+          var obj = this[association.getterName].call(this);
+          if (!obj.isValid()) {
+            this.addError(name, 'is invalid');
+          }
         }
       }
     },
