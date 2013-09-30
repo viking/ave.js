@@ -23,6 +23,7 @@ maria.Model.subclass(ave, 'Storage', {
         setModel = setModelConstructor.fromJSON(backend[collectionName]);
       }
       else {
+        setModel = new setModelConstructor();
       }
 
       var self = this;
