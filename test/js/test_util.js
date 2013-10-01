@@ -48,6 +48,12 @@ define([
       this.assertEquals('undefined', typeof(obj.bar));
     },
 
+    "send": function() {
+      var obj = {foo: sinon.stub()}
+      ave.send(obj, 'foo', [1, 2, 3]);
+      this.assertCalledWith(obj.foo, 1, 2, 3);
+    },
+
     "deepEqual": new prod.Suite("deepEqual", {
       "string equality": function() {
         this.assert(ave.deepEqual('foo', 'foo'));

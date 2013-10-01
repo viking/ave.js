@@ -37,6 +37,10 @@ ave.instantiateModel = function(modelClass, attributes) {
   return model;
 };
 
+ave.send = function(receiver, method, arguments) {
+  return receiver[method].apply(receiver, arguments);
+};
+
 ave.deepEqual = function(a, b) {
   if (a === b) return true;
   if (typeof(a) != typeof(b)) return false;
