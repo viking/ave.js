@@ -157,6 +157,7 @@ define([
         this.assertEquals("foo", foo2.getName());
         var bars2 = foo2.getBars();
         this.assertEquals(1, bars2.size);
+        this.assertSame(foo2, bars2.parentNode);
       },
 
       "event bubbling": function() {
@@ -216,6 +217,29 @@ define([
         var errors = foo.getErrors();
         this.assertEquals('is invalid', errors['bar'][0]);
       }),
+
+      "parent node": function() {
+        var foo = new this.modelClass();
+        foo.setId(1);
+        foo.setName("foo");
+        var bar = new this.subModelClass();
+        bar.setName("bar");
+        foo.setBar(bar);
+        this.assertSame(foo, bar.parentNode);
+      },
+
+      "parent node for replaced child": function() {
+        var foo = new this.modelClass();
+        foo.setId(1);
+        foo.setName("foo");
+        var bar = new this.subModelClass();
+        bar.setName("bar");
+        foo.setBar(bar);
+        var bar2 = new this.subModelClass();
+        bar2.setName("bar");
+        foo.setBar(bar2);
+        this.refute(bar.parentNode);
+      },
 
       // integration test
       "json round trip": function() {
