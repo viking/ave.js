@@ -174,6 +174,25 @@ define([
       model.setName("bar");
       setModel.add(model);
       this.assertEquals(3, model.getId());
+    },
+
+    "childAdded": function() {
+      var child = new this.modelClass();
+      var setModelClass = newSetModelClass()
+      var setModel = new setModelClass();
+      setModel.childAdded = sinon.spy();
+      setModel.add(child);
+      this.assertCalledWith(setModel.childAdded, child);
+    },
+
+    "childDeleted": function() {
+      var child = new this.modelClass();
+      var setModelClass = newSetModelClass()
+      var setModel = new setModelClass();
+      setModel.add(child);
+      setModel.childDeleted = sinon.spy();
+      setModel['delete'](child);
+      this.assertCalledWith(setModel.childDeleted, child);
     }
   });
 });

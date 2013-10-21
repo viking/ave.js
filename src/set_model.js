@@ -7,6 +7,12 @@ maria.SetModel.subclass(ave, 'SetModel', {
   },
 
   properties: {
+    childAdded: function(model) {
+    },
+
+    childDeleted: function(model) {
+    },
+
     toJSON: function() {
       return JSON.stringify(this.dump());
     },
@@ -69,6 +75,7 @@ maria.SetModel.subclass(ave, 'SetModel', {
           if (!this._loading) {
             model.setId(this._nextId++);
           }
+          this.childAdded(model);
         }
 
         for (var i = 0; i < evt.deletedTargets.length; i++) {
@@ -76,6 +83,8 @@ maria.SetModel.subclass(ave, 'SetModel', {
 
           // stop listening to validate events for removed targets
           maria.off(model, 'validate', this);
+
+          this.childDeleted(model);
         }
       }
     }
