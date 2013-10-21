@@ -19,12 +19,13 @@ maria.Model.subclass(ave, 'Model', {
       }
 
       if (!ave.deepEqual(this._attributes[name], value)) {
-        var oldValue = this._attributes[name];
+        var originalValues = {};
+        originalValues[name] = this._attributes[name];
+
         this._attributes[name] = value;
         if (!quiet) {
           this.dispatchEvent({
-            type: 'change', attributeName: name,
-            oldValue: oldValue, newValue: value
+            type: 'change', originalValues: originalValues
           });
         }
         return true;
@@ -34,13 +35,16 @@ maria.Model.subclass(ave, 'Model', {
 
     setAttributes: function(object) {
       var changed = false;
+      var originalValues = {};
       for (var key in object) {
+        var originalValue = this.getAttribute(key);
         if (this.setAttribute(key, object[key], true)) {
           changed = true;
+          originalValues[key] = originalValue;
         }
       }
       if (changed) {
-        this.dispatchEvent({type: 'change'});
+        this.dispatchEvent({type: 'change', originalValues: originalValues});
       }
     },
 
