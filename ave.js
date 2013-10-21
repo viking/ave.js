@@ -255,9 +255,13 @@ maria.Model.subclass(ave, 'Model', {
       }
 
       if (!ave.deepEqual(this._attributes[name], value)) {
+        var oldValue = this._attributes[name];
         this._attributes[name] = value;
         if (!quiet) {
-          this.dispatchEvent({type: 'change'});
+          this.dispatchEvent({
+            type: 'change', attributeName: name,
+            oldValue: oldValue, newValue: value
+          });
         }
         return true;
       }

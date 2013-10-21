@@ -43,6 +43,23 @@ define([
 
       model.setAttribute("foo", 123);
       this.assert(spy.calledOnce);
+      var event = spy.getCall(0).args[0];
+      this.assertEquals("foo", event.attributeName);
+      this.assertEquals(123, event.newValue);
+    },
+
+    "setAttribute sends old value in change event": function() {
+      var modelClass = newModelClass();
+      var model = new modelClass();
+      model.setAttribute("foo", 456);
+      var spy = sinon.spy();
+      maria.on(model, "change", spy);
+
+      model.setAttribute("foo", 123);
+      this.assert(spy.calledOnce);
+      var event = spy.getCall(0).args[0];
+      this.assertEquals("foo", event.attributeName);
+      this.assertEquals(456, event.oldValue);
     },
 
     "setAttribute doesn't trigger change event for same value": function() {
