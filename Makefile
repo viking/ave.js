@@ -7,12 +7,12 @@ SOURCES = src/util.js \
 	  src/storage.js \
 	  src/router.js
 
+test: ave.js
+	@phantomjs scripts/test.js
+
 ave.js: $(SOURCES)
 	@/bin/echo -e "define(['lib/maria'], function(maria) {\nvar ave = {};" > $@
 	@/bin/cat $(SOURCES) >> $@
 	@/bin/echo -e 'return ave;\n});' >> $@
-
-test: ave.js
-	@phantomjs scripts/test.js
 
 .PHONY: test
