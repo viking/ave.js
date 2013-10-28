@@ -216,5 +216,16 @@ define([
       child.destroy();
       this.assertEquals(0, setModel.size);
     },
+
+    "dump propagates arguments to children": function() {
+      var child = new this.modelClass();
+      var setModelClass = newSetModelClass()
+      var setModel = new setModelClass();
+      setModel.add(child);
+
+      sinon.stub(child, 'dump');
+      setModel.dump('foo');
+      this.assertCalledWith(child.dump, 'foo');
+    }
   });
 });

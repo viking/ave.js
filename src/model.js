@@ -82,7 +82,7 @@ maria.Model.subclass(ave, 'Model', {
       for (name in this._associations) {
         var association = this._associations[name];
         var obj = this[association.getterName].call(this);
-        attributes[name] = obj.dump();
+        attributes[name] = obj.dump.apply(obj, arguments);
       }
       return attributes;
     },

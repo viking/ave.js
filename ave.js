@@ -318,7 +318,7 @@ maria.Model.subclass(ave, 'Model', {
       for (name in this._associations) {
         var association = this._associations[name];
         var obj = this[association.getterName].call(this);
-        attributes[name] = obj.dump();
+        attributes[name] = obj.dump.apply(obj, arguments);
       }
       return attributes;
     },
@@ -518,8 +518,9 @@ maria.SetModel.subclass(ave, 'SetModel', {
 
     dump: function() {
       var data = {models: [], _nextId: this._nextId};
+      var args = arguments;
       this.forEach(function(model) {
-        data.models.push(model.dump());
+        data.models.push(model.dump.apply(model, args));
       });
       return data;
     },

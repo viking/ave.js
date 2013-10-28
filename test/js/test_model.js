@@ -165,6 +165,20 @@ define([
         this.assertSame(foo2, bars2.parentNode);
       },
 
+      "dump propagates arguments to children": function() {
+        var foo = new this.modelClass();
+        foo.setId(1);
+        foo.setName("foo");
+        var bars = foo.getBars();
+        var bar = new this.subModelClass();
+        bar.setName("bar");
+        bars.add(bar);
+
+        sinon.stub(bar, 'dump');
+        foo.dump('foo');
+        this.assertCalledWith(bar.dump, 'foo');
+      },
+
       "event bubbling": function() {
         var foo = new this.modelClass();
         foo.setId(1);
@@ -260,6 +274,19 @@ define([
         this.assertEquals("foo", foo2.getName());
         var bar2 = foo2.getBar();
         this.assertEquals("bar", bar2.getName());
+      },
+
+      "dump propagates arguments to children": function() {
+        var foo = new this.modelClass();
+        foo.setId(1);
+        foo.setName("foo");
+        var bar = new this.subModelClass();
+        bar.setName("bar");
+        foo.setBar(bar);
+
+        sinon.stub(bar, 'dump');
+        foo.dump('foo');
+        this.assertCalledWith(bar.dump, 'foo');
       },
 
       "event bubbling": function() {
@@ -461,6 +488,6 @@ define([
       var model = modelClass.fromJSON('{"id":1,"name":"foo"}');
       this.assertEquals(1, model.getId());
       this.assertEquals('foo', model.getName());
-    }
+    },
   });
 });

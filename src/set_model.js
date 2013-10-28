@@ -33,8 +33,9 @@ maria.SetModel.subclass(ave, 'SetModel', {
 
     dump: function() {
       var data = {models: [], _nextId: this._nextId};
+      var args = arguments;
       this.forEach(function(model) {
-        data.models.push(model.dump());
+        data.models.push(model.dump.apply(model, args));
       });
       return data;
     },
