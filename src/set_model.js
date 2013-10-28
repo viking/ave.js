@@ -92,7 +92,14 @@ maria.SetModel.subclass(ave, 'SetModel', {
           }
         }
         else {
-          this.childChanged(evt.target);
+          // determine if the child is part of this set model (maybe overkill)
+          this.some(function(model) {
+            if (model === evt.target) {
+              this.childChanged(evt);
+              return true;
+            }
+            return false;
+          }, this);
         }
       }
     }

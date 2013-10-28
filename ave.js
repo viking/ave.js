@@ -554,7 +554,6 @@ maria.SetModel.subclass(ave, 'SetModel', {
         this.validatesChild(evt.target);
       }
       else if (evt.type == 'change') {
-        console.log(evt);
         if (evt.target === this) {
           for (var i = 0; i < evt.addedTargets.length; i++) {
             var model = evt.addedTargets[i];
@@ -578,7 +577,14 @@ maria.SetModel.subclass(ave, 'SetModel', {
           }
         }
         else {
-          this.childChanged(evt.target);
+          // determine if the child is part of this set model (maybe overkill)
+          this.some(function(model) {
+            if (model === evt.target) {
+              this.childChanged(evt);
+              return true;
+            }
+            return false;
+          }, this);
         }
       }
     }

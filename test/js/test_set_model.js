@@ -202,7 +202,10 @@ define([
       setModel.add(child);
       setModel.childChanged = sinon.spy();
       child.setAttribute('foo', 'bar');
-      this.assertCalledWith(setModel.childChanged, child);
+      this.assertCalled(setModel.childChanged);
+
+      var evt = setModel.childChanged.getCall(0).args[0];
+      this.assertSame(child, evt.target);
     },
   });
 });
