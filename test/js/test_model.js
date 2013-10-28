@@ -481,6 +481,14 @@ define([
       this.assertEquals('{"id":1,"name":"foo"}', model.toJSON());
     },
 
+    "toJSON propagates arguments": function() {
+      var modelClass = newModelClass();
+      var model = new modelClass();
+      sinon.stub(model, 'dump').returns('foo');
+      this.assertEquals('"foo"', model.toJSON('blah'));
+      this.assertCalledWith(model.dump, 'blah');
+    },
+
     "fromJSON": function() {
       var modelClass = newModelClass({
         attributeNames: ['id', 'name']
@@ -488,6 +496,6 @@ define([
       var model = modelClass.fromJSON('{"id":1,"name":"foo"}');
       this.assertEquals(1, model.getId());
       this.assertEquals('foo', model.getName());
-    },
+    }
   });
 });

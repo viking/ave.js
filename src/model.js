@@ -88,7 +88,7 @@ maria.Model.subclass(ave, 'Model', {
     },
 
     toJSON: function() {
-      return JSON.stringify(this.dump());
+      return JSON.stringify(this.dump.apply(this, arguments));
     },
 
     validate: function() {

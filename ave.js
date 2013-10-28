@@ -324,7 +324,7 @@ maria.Model.subclass(ave, 'Model', {
     },
 
     toJSON: function() {
-      return JSON.stringify(this.dump());
+      return JSON.stringify(this.dump.apply(this, arguments));
     },
 
     validate: function() {
@@ -502,7 +502,7 @@ maria.SetModel.subclass(ave, 'SetModel', {
     },
 
     toJSON: function() {
-      return JSON.stringify(this.dump());
+      return JSON.stringify(this.dump.apply(this, arguments));
     },
 
     load: function(data) {

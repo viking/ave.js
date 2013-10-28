@@ -154,6 +154,15 @@ define([
       this.assertEquals('{"models":[{"id":1,"name":"foo"}],"_nextId":2}', setModel.toJSON());
     },
 
+    "toJSON propagates arguments": function() {
+      var setModelClass = newSetModelClass();
+      var setModel = new setModelClass();
+
+      sinon.stub(setModel, 'dump').returns('foo');
+      this.assertEquals('"foo"', setModel.toJSON('blah'));
+      this.assertCalledWith(setModel.dump, 'blah');
+    },
+
     "fromJSON": function() {
       var modelClass = newModelClass({
         attributeNames: ['id', 'name']
