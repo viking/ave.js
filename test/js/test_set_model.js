@@ -193,6 +193,16 @@ define([
       setModel.childDeleted = sinon.spy();
       setModel['delete'](child);
       this.assertCalledWith(setModel.childDeleted, child);
-    }
+    },
+
+    "childChanged": function() {
+      var child = new this.modelClass();
+      var setModelClass = newSetModelClass()
+      var setModel = new setModelClass();
+      setModel.add(child);
+      setModel.childChanged = sinon.spy();
+      child.setAttribute('foo', 'bar');
+      this.assertCalledWith(setModel.childChanged, child);
+    },
   });
 });

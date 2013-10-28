@@ -498,6 +498,9 @@ maria.SetModel.subclass(ave, 'SetModel', {
     childDeleted: function(model) {
     },
 
+    childChanged: function(model) {
+    },
+
     toJSON: function() {
       return JSON.stringify(this.dump());
     },
@@ -550,26 +553,32 @@ maria.SetModel.subclass(ave, 'SetModel', {
         evt.stopPropagation();
         this.validatesChild(evt.target);
       }
-      else if (evt.type == 'change' && evt.target === this) {
-        for (var i = 0; i < evt.addedTargets.length; i++) {
-          var model = evt.addedTargets[i];
+      else if (evt.type == 'change') {
+        console.log(evt);
+        if (evt.target === this) {
+          for (var i = 0; i < evt.addedTargets.length; i++) {
+            var model = evt.addedTargets[i];
 
-          // start listening to validate events for added targets
-          maria.on(model, 'validate', this);
-          model.parentNode = this;
-          if (!this._loading) {
-            model.setId(this._nextId++);
+            // start listening to validate events for added targets
+            maria.on(model, 'validate', this);
+            model.parentNode = this;
+            if (!this._loading) {
+              model.setId(this._nextId++);
+            }
+            this.childAdded(model);
           }
-          this.childAdded(model);
+
+          for (var i = 0; i < evt.deletedTargets.length; i++) {
+            var model = evt.deletedTargets[i];
+
+            // stop listening to validate events for removed targets
+            maria.off(model, 'validate', this);
+
+            this.childDeleted(model);
+          }
         }
-
-        for (var i = 0; i < evt.deletedTargets.length; i++) {
-          var model = evt.deletedTargets[i];
-
-          // stop listening to validate events for removed targets
-          maria.off(model, 'validate', this);
-
-          this.childDeleted(model);
+        else {
+          this.childChanged(evt.target);
         }
       }
     }
