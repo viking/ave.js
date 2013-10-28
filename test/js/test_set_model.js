@@ -207,5 +207,14 @@ define([
       var evt = setModel.childChanged.getCall(0).args[0];
       this.assertSame(child, evt.target);
     },
+
+    "destroying child": function() {
+      var child = new this.modelClass();
+      var setModelClass = newSetModelClass()
+      var setModel = new setModelClass();
+      setModel.add(child);
+      child.destroy();
+      this.assertEquals(0, setModel.size);
+    },
   });
 });
