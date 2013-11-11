@@ -225,14 +225,21 @@ ave.Model.subclass = function(namespace, name, options) {
       var getterName = 'get' + camelized;
       var setterName = 'set' + camelized;
 
-      (function(attributeName) {
-        properties[getterName] = function() {
-          return this.getAttribute(attributeName);
-        }
-        properties[setterName] = function(value) {
-          this.setAttribute(attributeName, value);
-        }
-      })(attributeName);
+      if (!properties.hasOwnProperty(getterName)) {
+        (function(attributeName, getterName) {
+          properties[getterName] = function() {
+            return this.getAttribute(attributeName);
+          }
+        })(attributeName, getterName);
+      }
+
+      if (!properties.hasOwnProperty(setterName)) {
+        (function(attributeName, setterName) {
+          properties[setterName] = function(value) {
+            this.setAttribute(attributeName, value);
+          }
+        })(attributeName, setterName);
+      }
     }
     properties._attributeNames = options.attributeNames;
   }

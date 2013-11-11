@@ -382,6 +382,19 @@ define([
       this.assertEquals(model.getProjectId(), 456);
     },
 
+    "allow overriding attribute helpers": function() {
+      var spy = sinon.spy();
+      var modelClass = newModelClass({
+        attributeNames: ['foo'],
+        properties: {
+          setFoo: spy
+        }
+      });
+      var model = new modelClass();
+      model.setFoo('bar');
+      this.assertCalled(spy);
+    },
+
     "validate presence": function() {
       var result;
       var modelClass = newModelClass({
