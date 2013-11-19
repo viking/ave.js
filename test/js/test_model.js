@@ -179,7 +179,7 @@ define([
         this.assertCalledWith(bar.dump, 'foo');
       },
 
-      "event bubbling": function() {
+      "change event bubbling": function() {
         var foo = new this.modelClass();
         foo.setId(1);
         foo.setName("foo");
@@ -192,6 +192,18 @@ define([
         bars.add(bar);
         this.assertCalled(spy);
       },
+
+      "stops validate event propagation": function() {
+        var foo = new this.modelClass();
+        var bars = foo.getBars();
+        var bar = new this.subModelClass();
+        bars.add(bar);
+
+        var spy = sinon.spy();
+        maria.on(foo, 'validate', spy);
+        bars.isValid();
+        this.assertCalled(spy, 0);
+      }
     }),
 
     "subclass with hasOne association": new prod.Suite('subclass with hasOne association', {

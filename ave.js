@@ -366,6 +366,12 @@ maria.Model.subclass(ave, 'Model', {
       }
       return true;
     },
+
+    handleEvent: function(evt) {
+      if (evt.type == 'validate') {
+        evt.stopPropagation();
+      }
+    }
   }
 });
 
@@ -408,6 +414,7 @@ ave.Model.subclass = function(namespace, name, options) {
 
               obj.parentNode = this;
               obj.addParentEventTarget(this);
+              maria.on(obj, 'validate', this);
               this[propertyName] = obj;
             };
 
