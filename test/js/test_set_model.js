@@ -222,8 +222,13 @@ define([
       var setModelClass = newSetModelClass()
       var setModel = new setModelClass();
       setModel.add(child);
+
+      var spy = sinon.spy();
+      maria.on(setModel, 'change', spy);
       child.destroy();
+
       this.assertEquals(0, setModel.size);
+      this.assertCalled(spy);
     },
 
     "dump propagates arguments to children": function() {

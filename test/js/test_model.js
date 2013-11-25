@@ -191,6 +191,11 @@ define([
         maria.on(foo, 'change', spy);
         bars.add(bar);
         this.assertCalled(spy);
+        spy.reset();
+        this.assertCalled(spy);
+
+        bar.destroy();
+        this.assertCalled(spy);
       },
 
       "stops validate event propagation": function() {
