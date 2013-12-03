@@ -102,5 +102,11 @@ define([
         this.refute(ave.deepEqual({foo: 123}, {foo: 123, bar: 456}))
       }
     }),
+
+    'isBlank': function() {
+      this.assert(ave.isBlank(''));
+      this.assert(ave.isBlank(null));
+      this.refute(ave.isBlank('foo'));
+    }
   });
 });

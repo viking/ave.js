@@ -79,3 +79,7 @@ ave.deepEqual = function(a, b) {
 
   return true;
 };
+
+ave.isBlank = function(value) {
+  return value == null || value == '';
+};
