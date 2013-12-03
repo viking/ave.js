@@ -354,8 +354,7 @@ maria.Model.subclass(ave, 'Model', {
 
     validatesPresence: function(attributeName) {
       if (!this._attributes.hasOwnProperty(attributeName) ||
-          this._attributes[attributeName] == null ||
-          this._attributes[attributeName] == "") {
+          ave.isBlank(this._attributes[attributeName])) {
         this.addError(attributeName, 'is required');
         return false;
       }
