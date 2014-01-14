@@ -70,7 +70,7 @@ maria.Model.subclass(ave, 'Storage', {
 
     _register: function(collectionName, setModelConstructor, setModel) {
       var self = this;
-      maria.on(setModel, 'change', function(evt) {
+      maria.on(setModel, 'save', function(evt) {
         self._update(collectionName);
       });
 

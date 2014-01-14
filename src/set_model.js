@@ -106,6 +106,10 @@ maria.SetModel.subclass(ave, 'SetModel', {
       else {
         maria.SetModel.prototype.handleEvent.apply(this, arguments);
       }
+    },
+
+    save: function() {
+      this.dispatchEvent({type: 'save'});
     }
   }
 });

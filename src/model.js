@@ -134,6 +134,10 @@ maria.Model.subclass(ave, 'Model', {
       if (evt.type == 'validate') {
         evt.stopPropagation();
       }
+    },
+
+    save: function(evt) {
+      this.dispatchEvent({type: 'save'});
     }
   }
 });

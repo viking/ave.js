@@ -42,6 +42,7 @@ define([
         model.setName('foo');
         sinon.stub(setModel, 'toJSON').returns('foobar');
         setModel.add(model);
+        setModel.save();
 
         this.assertEquals('foobar', this.backend['foos']);
         this.assertCalled(spy);
@@ -105,6 +106,7 @@ define([
           model.setName('foo');
           sinon.stub(setModel, 'toJSON').returns('foobar');
           setModel.add(model);
+          setModel.save();
         });
         this.server.respond();
       },

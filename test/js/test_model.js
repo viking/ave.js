@@ -525,6 +525,15 @@ define([
       var model = modelClass.fromJSON('{"id":1,"name":"foo"}');
       this.assertEquals(1, model.getId());
       this.assertEquals('foo', model.getName());
+    },
+
+    "save": function() {
+      var modelClass = newModelClass();
+      var model = new modelClass();
+      var spy = sinon.spy();
+      maria.on(model, 'save', spy);
+      model.save();
+      this.assertCalled(spy);
     }
   });
 });

@@ -382,6 +382,10 @@ maria.Model.subclass(ave, 'Model', {
       if (evt.type == 'validate') {
         evt.stopPropagation();
       }
+    },
+
+    save: function(evt) {
+      this.dispatchEvent({type: 'save'});
     }
   }
 });
@@ -616,6 +620,10 @@ maria.SetModel.subclass(ave, 'SetModel', {
       else {
         maria.SetModel.prototype.handleEvent.apply(this, arguments);
       }
+    },
+
+    save: function() {
+      this.dispatchEvent({type: 'save'});
     }
   }
 });
@@ -715,7 +723,7 @@ maria.Model.subclass(ave, 'Storage', {
 
     _register: function(collectionName, setModelConstructor, setModel) {
       var self = this;
-      maria.on(setModel, 'change', function(evt) {
+      maria.on(setModel, 'save', function(evt) {
         self._update(collectionName);
       });
 

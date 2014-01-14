@@ -240,6 +240,15 @@ define([
       sinon.stub(child, 'dump');
       setModel.dump('foo');
       this.assertCalledWith(child.dump, 'foo');
+    },
+
+    "save": function() {
+      var setModelClass = newSetModelClass()
+      var setModel = new setModelClass();
+      var spy = sinon.spy();
+      maria.on(setModel, 'save', spy);
+      setModel.save();
+      this.assertCalled(spy);
     }
   });
 });
