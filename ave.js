@@ -281,7 +281,7 @@ maria.Model.subclass(ave, 'Model', {
       return false;
     },
 
-    setAttributes: function(object) {
+    setAttributes: function(object, quiet) {
       var changed = false;
       var originalValues = {};
       for (var key in object) {
@@ -291,7 +291,7 @@ maria.Model.subclass(ave, 'Model', {
           originalValues[key] = originalValue;
         }
       }
-      if (changed) {
+      if (changed && !quiet) {
         this.dispatchEvent({type: 'change', originalValues: originalValues});
       }
     },
@@ -307,7 +307,7 @@ maria.Model.subclass(ave, 'Model', {
         delete(data[name]);
       }
 
-      this.setAttributes(data);
+      this.setAttributes(data, true);
     },
 
     getAttribute: function(name) {
@@ -421,7 +421,21 @@ ave.Model.subclass = function(namespace, name, options) {
         case 'hasMany':
           setterName = '_set' + ave.camelize(associationName);
           var constructor = config.constructor;
-          (function(getterName, setterName, propertyName, constructor) {
+          if (config.getter) {
+            properties[getterName] = config.getter;
+          }
+          else {
+            (function(getterName, setterName, propertyName, constructor) {
+              properties[getterName] = function() {
+                if (!this[propertyName]) {
+                  this[setterName].call(this, new constructor());
+                }
+                return this[propertyName];
+              };
+            })(getterName, setterName, propertyName, constructor);
+          }
+
+          (function(setterName, propertyName) {
             properties[setterName] = function(obj) {
               if (this[propertyName]) {
                 throw "property is already set";
@@ -432,22 +446,25 @@ ave.Model.subclass = function(namespace, name, options) {
               maria.on(obj, 'validate', this);
               this[propertyName] = obj;
             };
+          })(setterName, propertyName);
 
-            properties[getterName] = function() {
-              if (!this[propertyName]) {
-                this[setterName].call(this, new constructor());
-              }
-              return this[propertyName];
-            };
-          })(getterName, setterName, propertyName, constructor);
           break;
         case 'hasOne':
           setterName = 'set' + ave.capitalize(associationName);
           var constructor = config.constructor;
-          (function(getterName, setterName, propertyName, constructor) {
-            properties[getterName] = function() {
-              return this[propertyName];
-            };
+          if (config.getter) {
+            properties[getterName] = config.getter;
+          }
+          else {
+            (function(getterName, propertyName) {
+              properties[getterName] = function() {
+                return this[propertyName];
+              };
+            })(getterName, propertyName);
+            properties[propertyName] = null;
+          }
+
+          (function(setterName, propertyName, constructor) {
             properties[setterName] = function(model) {
               if (model instanceof constructor) {
                 if (this[propertyName]) {
@@ -466,8 +483,7 @@ ave.Model.subclass = function(namespace, name, options) {
                 throw("model is not an instance of the specified constructor");
               }
             };
-          })(getterName, setterName, propertyName, constructor);
-          properties[propertyName] = null;
+          })(setterName, propertyName, constructor);
           break;
       }
 

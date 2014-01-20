@@ -131,6 +131,32 @@ define([
         this.assertSame(bars, foo.getBars());
       },
 
+      "custom association getter": function() {
+        var subModelClass = newModelClass({
+          attributeNames: ['id', 'name']
+        });
+        var setModelClass = newSetModelClass({
+          modelConstructor: subModelClass
+        });
+
+        var bars = new setModelClass();
+        var stub = sinon.stub().returns(bars);
+        var modelClass = newModelClass({
+          attributeNames: ['id', 'name'],
+          associations: {
+            bars: {
+              type: 'hasMany',
+              constructor: setModelClass,
+              getter: stub
+            }
+          }
+        });
+
+        var foo = new modelClass();
+        this.assertSame(bars, foo.getBars());
+        this.assertCalled(stub);
+      },
+
       "validate association": function() {
         var foo = new this.modelClass();
         var bars = foo.getBars();
@@ -242,6 +268,27 @@ define([
         });
       },
 
+      "custom association getter": function() {
+        var subModelClass = newModelClass({
+          attributeNames: ['id', 'name']
+        });
+        var bar = new subModelClass();
+        var stub = sinon.stub().returns(bar);
+        var modelClass = newModelClass({
+          attributeNames: ['id', 'name'],
+          associations: {
+            bar: {
+              type: 'hasOne',
+              constructor: this.subModelClass,
+              getter: stub
+            }
+          }
+        });
+        var foo = new modelClass();
+        this.assertSame(bar, foo.getBar());
+        this.assertCalled(stub);
+      },
+
       "validate association": sinon.test(function() {
         var foo = new this.modelClass();
         var bar = new this.subModelClass();
@@ -290,6 +337,11 @@ define([
         this.assertEquals("foo", foo2.getName());
         var bar2 = foo2.getBar();
         this.assertEquals("bar", bar2.getName());
+      },
+
+      "load when no association info is included": function() {
+        var foo = new this.modelClass();
+        foo.load({id: 1, name: "foo"});
       },
 
       "dump propagates arguments to children": function() {
