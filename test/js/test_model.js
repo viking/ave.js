@@ -127,8 +127,16 @@ define([
 
       "association getter": function() {
         var foo = new this.modelClass();
+        var spy = sinon.spy();
+        maria.on(foo, 'association', spy);
         var bars = foo.getBars();
         this.assertSame(bars, foo.getBars());
+        this.assertCalled(spy);
+        var call = spy.getCall(0);
+        var evt = call.args[0];
+        this.assertEquals('bars', evt.associationName);
+        this.assertEquals('hasMany', evt.associationType);
+        this.assertEquals('get', evt.method);
       },
 
       "custom association getter": function() {
@@ -252,7 +260,15 @@ define([
 
       "association accessors": function() {
         var foo = new this.modelClass();
-        this.assertEquals(foo.getBar(), null);
+        var spy = sinon.spy();
+        maria.on(foo, 'association', spy);
+        this.assertSame(foo.getBar(), undefined);
+        this.assertCalled(spy);
+        var call = spy.getCall(0);
+        var evt = call.args[0];
+        this.assertEquals('bar', evt.associationName);
+        this.assertEquals('hasOne', evt.associationType);
+        this.assertEquals('get', evt.method);
 
         var bar = new this.subModelClass();
         foo.setBar(bar);
