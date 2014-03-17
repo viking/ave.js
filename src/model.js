@@ -61,11 +61,13 @@ maria.Model.subclass(ave, 'Model', {
       // override to control JSON unserialization
       var name;
       for (name in this._associations) {
-        var association = this._associations[name];
-        var obj = new association.constructor();
-        obj.load(data[name]);
-        this[association.setterName].call(this, obj);
-        delete(data[name]);
+        if (name in data) {
+          var association = this._associations[name];
+          var obj = new association.constructor();
+          obj.load(data[name]);
+          this[association.setterName].call(this, obj);
+          delete(data[name]);
+        }
       }
 
       this.setAttributes(data, true);
