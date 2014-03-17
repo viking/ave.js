@@ -20,6 +20,14 @@ define([
   }
 
   return new prod.Suite('Model', {
+    setUp: function() {
+      this._modelEvents = ave.Model.events;
+    },
+
+    tearDown: function() {
+      ave.Model.events = this._modelEvents;
+    },
+
     "setAttribute": function() {
       var modelClass = newModelClass();
       var model = new modelClass();
@@ -618,6 +626,35 @@ define([
       maria.on(model, 'save', spy);
       model.save();
       this.assertCalled(spy);
+    },
+
+    "model events are applied to instance objects": function() {
+      var spy = sinon.spy();
+      var modelClass = newModelClass({
+        events: {
+          foo: [spy]
+        }
+      });
+      var model = new modelClass();
+      model.dispatchEvent({type: 'foo'});
+      this.assertCalled(spy);
+    },
+
+    "global events are applied to instance objects": function() {
+      var spy1 = sinon.spy();
+      ave.Model.events = {
+        foo: [spy1]
+      };
+      var spy2 = sinon.spy();
+      var modelClass = newModelClass({
+        events: {
+          foo: [spy2]
+        }
+      });
+      var model = new modelClass();
+      model.dispatchEvent({type: 'foo'});
+      this.assertCalled(spy1);
+      this.assertCalled(spy2);
     },
 
     "Model.find() dispatches 'get' event and returns object": function() {

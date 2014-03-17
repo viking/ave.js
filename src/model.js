@@ -10,6 +10,17 @@ maria.Model.subclass(ave, 'Model', {
       }
     }
 
+    // attach global event listeners
+    if (ave.Model.events) {
+      for (name in ave.Model.events) {
+        var events = ave.Model.events[name];
+        for (var i = 0; i < events.length; i++) {
+          maria.on(this, name, events[i]);
+        }
+      }
+    }
+
+    // attach model event listeners
     if (this._events) {
       for (name in this._events) {
         var events = this._events[name];
