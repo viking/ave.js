@@ -425,20 +425,14 @@ ave.Model.subclass = function(namespace, name, options) {
             properties[getterName] = config.getter;
           }
           else {
-            (function(associationName, getterName, setterName, propertyName, constructor) {
+            (function(getterName, setterName, propertyName, constructor) {
               properties[getterName] = function() {
-                this.dispatchEvent({
-                  type: 'association',
-                  associationName: associationName,
-                  associationType: 'hasMany',
-                  method: 'get'
-                });
                 if (!this[propertyName]) {
                   this[setterName].call(this, new constructor());
                 }
                 return this[propertyName];
               };
-            })(associationName, getterName, setterName, propertyName, constructor);
+            })(getterName, setterName, propertyName, constructor);
           }
 
           (function(setterName, propertyName) {
@@ -462,17 +456,12 @@ ave.Model.subclass = function(namespace, name, options) {
             properties[getterName] = config.getter;
           }
           else {
-            (function(associationName, getterName, propertyName) {
+            (function(getterName, propertyName) {
               properties[getterName] = function() {
-                this.dispatchEvent({
-                  type: 'association',
-                  associationName: associationName,
-                  associationType: 'hasOne',
-                  method: 'get'
-                });
                 return this[propertyName];
               };
-            })(associationName, getterName, propertyName);
+            })(getterName, propertyName);
+            properties[propertyName] = null;
           }
 
           (function(setterName, propertyName, constructor) {
