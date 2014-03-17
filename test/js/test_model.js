@@ -595,30 +595,13 @@ define([
       this.assertEquals('foo', model.getName());
     },
 
-    "model.save() dispatches 'save' event": function() {
+    "save": function() {
       var modelClass = newModelClass();
       var model = new modelClass();
       var spy = sinon.spy();
       maria.on(model, 'save', spy);
       model.save();
       this.assertCalled(spy);
-    },
-
-    "Model.find() dispatches 'get' event and returns object": function() {
-      var self = this;
-      var callback = sinon.spy(function(evt) {
-        self.assert(evt.target instanceof modelClass);
-        self.assertEquals({id: 1}, evt.conditions);
-        evt.data = {id: 1, name: 'foo'}
-      });
-      var modelClass = newModelClass({
-        attributeNames: ['id', 'name'],
-        events: {
-          get: [callback]
-        }
-      });
-      var result = modelClass.find(1);
-      this.assertCalled(callback);
     }
   });
 });
