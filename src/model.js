@@ -9,6 +9,15 @@ maria.Model.subclass(ave, 'Model', {
         this._attributes[this._attributeNames[i]] = null;
       }
     }
+
+    if (this._events) {
+      for (name in this._events) {
+        var events = this._events[name];
+        for (var i = 0; i < events.length; i++) {
+          maria.on(this, name, events[i]);
+        }
+      }
+    }
   },
   properties: {
     _attributeNames: null,
@@ -157,6 +166,15 @@ ave.Model.fromJSON = function(json) {
   return model;
 };
 
+ave.Model.find = function(id) {
+  var model = new this();
+  model.dispatchEvent({
+    type: 'get',
+    conditions: {id: id}
+  });
+  return model;
+}
+
 ave.Model.subclass = function(namespace, name, options) {
   options = options || {};
   var properties = options.properties || (options.properties = {});
@@ -280,9 +298,14 @@ ave.Model.subclass = function(namespace, name, options) {
     }
     properties._attributeNames = options.attributeNames;
   }
+  if (options.events) {
+    properties._events = options.events;
+  }
   maria.subclass.call(this, namespace, name, options);
+
   var klass = namespace[name];
   klass.fromJSON = ave.Model.fromJSON;
+  klass.find = ave.Model.find;
 
   if (options.entityName) {
     klass.entityName = options.entityName;
