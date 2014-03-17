@@ -199,22 +199,6 @@ define([
         this.assertSame(foo2, bars2.parentNode);
       },
 
-      "load with missing association doesn't throw error": function() {
-        var foo = new this.modelClass();
-        foo.setId(1);
-        foo.setName("foo");
-        var bars = foo.getBars();
-        var bar = new this.subModelClass();
-        bar.setName("bar");
-        bars.add(bar);
-        var json = foo.toJSON();
-        var data = JSON.parse(json);
-        delete(data.bars);
-        json = JSON.stringify(data);
-
-        this.modelClass.fromJSON(json);
-      },
-
       "dump propagates arguments to children": function() {
         var foo = new this.modelClass();
         foo.setId(1);
