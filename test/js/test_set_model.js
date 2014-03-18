@@ -102,6 +102,27 @@ define([
       this.assertSame(this.modelClass, setModel._modelConstructor);
     },
 
+    "toSortedArray does nothing by default": function() {
+      var modelClass = newModelClass({
+        attributeNames: ['name']
+      });
+      var setModelClass = newSetModelClass({
+        modelConstructor: modelClass
+      });
+      var setModel = new setModelClass();
+
+      var model_1 = new modelClass();
+      model_1.setName('foo');
+      setModel.add(model_1);
+
+      var model_2 = new modelClass();
+      model_2.setName('bar');
+      setModel.add(model_2);
+
+      var expected = setModel.toArray();
+      this.assertEquals(expected, setModel.toSortedArray());
+    },
+
     "toJSON": function() {
       var modelClass = newModelClass({
         attributeNames: ['name']
@@ -114,6 +135,40 @@ define([
       setModel.add(model);
 
       this.assertEquals('[{"name":"foo"}]', setModel.toJSON());
+    },
+
+    "toJSON uses sorted array": function() {
+      var modelClass = newModelClass({
+        attributeNames: ['name']
+      });
+      var setModelClass = newSetModelClass({
+        properties: {
+          toSortedArray: function() {
+            return this.toArray().sort(function(a, b) {
+              var name_1 = a.getName();
+              var name_2 = b.getName();
+              if (name_1 < name_2) {
+                return -1;
+              }
+              if (name_1 > name_2) {
+                return 1;
+              }
+              return 0;
+            });
+          }
+        }
+      });
+      var setModel = new setModelClass();
+
+      var model_1 = new modelClass();
+      model_1.setName('foo');
+      setModel.add(model_1);
+
+      var model_2 = new modelClass();
+      model_2.setName('bar');
+      setModel.add(model_2);
+
+      this.assertEquals('[{"name":"bar"},{"name":"foo"}]', setModel.toJSON());
     },
 
     "toJSON propagates arguments": function() {

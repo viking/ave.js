@@ -16,6 +16,10 @@ maria.SetModel.subclass(ave, 'SetModel', {
     childChanged: function(model) {
     },
 
+    toSortedArray: function() {
+      return this.toArray();
+    },
+
     toJSON: function() {
       return JSON.stringify(this.dump.apply(this, arguments));
     },
@@ -33,7 +37,7 @@ maria.SetModel.subclass(ave, 'SetModel', {
     dump: function() {
       var data = [];
       var args = arguments;
-      this.forEach(function(model) {
+      this.toSortedArray().forEach(function(model) {
         data.push(model.dump.apply(model, args));
       });
       return data;
