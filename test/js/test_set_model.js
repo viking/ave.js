@@ -10,7 +10,7 @@ define([
   function newModelClass(options) {
     var namespace = {};
     var opts = {
-      attributeNames: ['id', 'foo']
+      attributeNames: ['foo']
     };
     if (typeof(options) == 'object') {
       maria.borrow(opts, options);
@@ -86,44 +86,6 @@ define([
       this.assertCalled(spy, 0);
     },
 
-    "sets id on add": function() {
-      var child = new this.modelClass();
-      sinon.stub(child, 'setId');
-      var setModelClass = newSetModelClass()
-      var setModel = new setModelClass();
-      setModel.add(child);
-      this.assertCalledWith(child.setId, 1);
-    },
-
-    "sets id on multiple add": function() {
-      var child_1 = new this.modelClass();
-      sinon.stub(child_1, 'setId');
-      var child_2 = new this.modelClass();
-      sinon.stub(child_2, 'setId');
-
-      var setModelClass = newSetModelClass()
-      var setModel = new setModelClass();
-      setModel.add(child_1, child_2);
-      this.assertCalledWith(child_1.setId, 1);
-      this.assertCalledWith(child_2.setId, 2);
-    },
-
-    "doesn't reuse id": function() {
-      var child_1 = new this.modelClass();
-      sinon.stub(child_1, 'setId');
-      var child_2 = new this.modelClass();
-      sinon.stub(child_2, 'setId');
-
-      var setModelClass = newSetModelClass()
-      var setModel = new setModelClass();
-      setModel.add(child_1);
-      this.assertCalledWith(child_1.setId, 1);
-      setModel.delete(child_1);
-
-      setModel.add(child_2);
-      this.assertCalledWith(child_2.setId, 2);
-    },
-
     "sets parentNode on add": function() {
       var child = new this.modelClass();
       var setModelClass = newSetModelClass();
@@ -142,7 +104,7 @@ define([
 
     "toJSON": function() {
       var modelClass = newModelClass({
-        attributeNames: ['id', 'name']
+        attributeNames: ['name']
       });
       var setModelClass = newSetModelClass();
 
@@ -151,7 +113,7 @@ define([
       var setModel = new setModelClass();
       setModel.add(model);
 
-      this.assertEquals('{"models":[{"id":1,"name":"foo"}],"_nextId":2}', setModel.toJSON());
+      this.assertEquals('[{"name":"foo"}]', setModel.toJSON());
     },
 
     "toJSON propagates arguments": function() {
@@ -165,24 +127,18 @@ define([
 
     "fromJSON": function() {
       var modelClass = newModelClass({
-        attributeNames: ['id', 'name']
+        attributeNames: ['name']
       });
       var setModelClass = newSetModelClass({
         modelConstructor: modelClass
       });
 
-      var setModel = setModelClass.fromJSON('{"models":[{"id":2,"name":"foo"}],"_nextId":3}');
+      var setModel = setModelClass.fromJSON('[{"name":"foo"}]');
       this.assertEquals(1, setModel.size);
 
       setModel.forEach(function(model) {
-        this.assertEquals(2, model.getId());
         this.assertEquals("foo", model.getName());
       }, this);
-
-      var model = new modelClass();
-      model.setName("bar");
-      setModel.add(model);
-      this.assertEquals(3, model.getId());
     },
 
     "childAdded": function() {

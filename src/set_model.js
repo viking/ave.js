@@ -22,20 +22,19 @@ maria.SetModel.subclass(ave, 'SetModel', {
 
     load: function(data) {
       this._loading = true;
-      for (var i = 0; i < data.models.length; i++) {
+      for (var i = 0; i < data.length; i++) {
         var model = new this._modelConstructor();
-        model.load(data.models[i]);
+        model.load(data[i]);
         this.add(model);
       }
       this._loading = false;
-      this._nextId = data._nextId;
     },
 
     dump: function() {
-      var data = {models: [], _nextId: this._nextId};
+      var data = [];
       var args = arguments;
       this.forEach(function(model) {
-        data.models.push(model.dump.apply(model, args));
+        data.push(model.dump.apply(model, args));
       });
       return data;
     },
@@ -77,9 +76,6 @@ maria.SetModel.subclass(ave, 'SetModel', {
             // start listening to validate events for added targets
             maria.on(model, 'validate', this);
             model.parentNode = this;
-            if (!this._loading) {
-              model.setId(this._nextId++);
-            }
             this.childAdded(model);
           }
 

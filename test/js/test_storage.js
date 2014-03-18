@@ -58,7 +58,7 @@ define([
         var setModelClass = newSetModelClass({
           modelConstructor: modelClass
         });
-        this.backend["foos"] = '{"models":[{"id":1,"name":"foo"}],"_nextId":2}';
+        this.backend["foos"] = '[{"id":1,"name":"foo"}]';
         this.store.register("foos", setModelClass);
 
         var setModel = this.store.getCollection("foos");
@@ -120,7 +120,7 @@ define([
         });
 
         this.server.respondWith("GET", "http://example.com/foos.json",
-          [ 200, { "Content-Type": "application/json" }, '{"models":[{"id":1,"name":"foo"}],"_nextId":2}' ]
+          [ 200, { "Content-Type": "application/json" }, '[{"id":1,"name":"foo"}]' ]
         );
         var self = this;
         this.store.register("foos", setModelClass, done(function() {
