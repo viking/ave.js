@@ -95,11 +95,12 @@ define([
           var called = false;
           self.server.respondWith("POST", "http://example.com/foos.json", function(request) {
             called = true;
-            request.respond(200, {}, "");
+            request.respond(200, {}, '{"foo":"bar"}');
           });
           maria.on(self.store, 'change', done(function(evt) {
             self.assert(called);
             self.assertEquals('foos', evt.collectionName);
+            self.assertEquals({foo: "bar"}, evt.response);
           }));
 
           var model = new modelClass();

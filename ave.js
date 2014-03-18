@@ -766,6 +766,7 @@ maria.Model.subclass(ave, 'Storage', {
           if (xhr.readyState != 4)
             return;
 
+          event.response = JSON.parse(xhr.responseText);
           self.dispatchEvent(event);
         };
         xhr.open("post", backend + "/" + collectionName + ".json");
