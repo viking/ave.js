@@ -77,7 +77,7 @@ define([
         this.server.restore();
       },
 
-      "adding to an registered collection": function(done) {
+      "adding to a registered collection": function(done) {
         var modelClass = newModelClass({
           attributeNames: ['id', 'name']
         });
@@ -130,43 +130,6 @@ define([
         }));
         this.server.respond();
       },
-
-      /*
-      "hasMany associations": function(done) {
-        var subModelClass = newModelClass({
-          attributeNames: ['id', 'name']
-        });
-        var subSetModelClass = newSetModelClass({
-          modelConstructor: subModelClass
-        });
-        var modelClass = newModelClass({
-          attributeNames: ['id', 'name'],
-          associations: {
-            bars: {type: 'hasMany', constructor: subSetModelClass}
-          }
-        });
-        var setModelClass = newSetModelClass({
-          modelConstructor: modelClass
-        });
-
-        this.server.respondWith("GET", "http://example.com/foos.json",
-          [ 200, { "Content-Type": "application/json" }, '{"models":[{"id":1,"name":"foo"}],"_nextId":2}' ]
-        );
-        this.server.respondWith("GET", "http://example.com/foos/1/bars.json",
-          [ 200, { "Content-Type": "application/json" }, '{"models":[{"id":1,"name":"bar"}],"_nextId":2}' ]
-        );
-        var self = this;
-        this.store.register("foos", setModelClass, done(function() {
-          var setModel = self.store.getCollection("foos");
-          self.assertEquals(1, setModel.size)
-          setModel.forEach(function(model) {
-            var subSetModel = model.getBars();
-            self.assertEquals(1, subSetModel.size);
-          });
-        }));
-        this.server.respond();
-      }
-      */
     })
   });
 });
