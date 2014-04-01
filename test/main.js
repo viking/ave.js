@@ -10,8 +10,8 @@ require([
   'lib/prod'
 ], function(prod) {
   var logger;
-  var phantom = navigator.userAgent.match(/PhantomJS/);
-  if (phantom) {
+  prod.phantom = navigator.userAgent.match(/PhantomJS/);
+  if (prod.phantom) {
     logger = new prod.ConsoleLogger(console);
   }
   else {
@@ -31,7 +31,7 @@ require([
       runner.addSuite(arguments[i]);
     }
     runner.run(function() {
-      if (phantom) {
+      if (prod.phantom) {
         console.log("QUIT"); // tell phantom to stop
       }
     });
