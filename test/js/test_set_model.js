@@ -260,6 +260,38 @@ define([
       maria.on(setModel, 'save', spy);
       setModel.save();
       this.assertCalled(spy);
+    },
+
+    "save keeps track of added elements since last save": function() {
+      var setModelClass = newSetModelClass()
+      var setModel = new setModelClass();
+      var model = new this.modelClass();
+      setModel.add(model);
+
+      var spy = sinon.spy();
+      maria.on(setModel, 'save', spy);
+      setModel.save();
+
+      this.assertCalled(spy);
+      var evt = spy.getCall(0).args[0];
+      this.assertEquals([model], evt.addedTargets);
+    },
+
+    "save keeps track of deleted elements since last save": function() {
+      var setModelClass = newSetModelClass()
+      var setModel = new setModelClass();
+      var model = new this.modelClass();
+      setModel.add(model);
+      setModel.save();
+      setModel['delete'](model);
+
+      var spy = sinon.spy();
+      maria.on(setModel, 'save', spy);
+      setModel.save();
+
+      this.assertCalled(spy);
+      var evt = spy.getCall(0).args[0];
+      this.assertEquals([model], evt.deletedTargets);
     }
   });
 });

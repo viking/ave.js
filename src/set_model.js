@@ -4,6 +4,7 @@ maria.SetModel.subclass(ave, 'SetModel', {
     ave.ValidationHelper.apply(this);
     maria.on(this, 'change', this);
     this._nextId = 1;
+    this._changes = {addedTargets: [], deletedTargets: []};
   },
 
   properties: {
@@ -81,6 +82,7 @@ maria.SetModel.subclass(ave, 'SetModel', {
             maria.on(model, 'validate', this);
             model.parentNode = this;
             this.childAdded(model);
+            this._changes.addedTargets.push(model);
           }
 
           for (var i = 0; i < evt.deletedTargets.length; i++) {
@@ -90,6 +92,7 @@ maria.SetModel.subclass(ave, 'SetModel', {
             maria.off(model, 'validate', this);
 
             this.childDeleted(model);
+            this._changes.deletedTargets.push(model);
           }
         }
         else {
@@ -109,7 +112,15 @@ maria.SetModel.subclass(ave, 'SetModel', {
     },
 
     save: function() {
-      this.dispatchEvent({type: 'save'});
+      var evt = {
+        type: 'save',
+        addedTargets: this._changes.addedTargets.slice(0),
+        deletedTargets: this._changes.deletedTargets.slice(0)
+      };
+
+      this.dispatchEvent(evt);
+      this._changes.addedTargets.length = 0;
+      this._changes.deletedTargets.length = 0;
     }
   }
 });
