@@ -769,33 +769,29 @@ maria.Model.subclass(ave, 'Storage', {
       var backend = this.getBackend();
       var mode = this.getMode();
       var collection = this._collections[collectionName];
-      var event = {type: 'change', collectionName: collectionName, originalEvent: evt};
+      var baseEvent = {type: 'change', collectionName: collectionName, originalEvent: evt};
 
       if (mode == "local") {
         var data = collection.setModel.toJSON();
         backend[collectionName] = data;
-        this.dispatchEvent(event);
+        this.dispatchEvent(baseEvent);
       }
       else if (mode == "remote") {
-        var xhr = new XMLHttpRequest();
         var url = backend + "/" + collectionName + ".json";
         var self = this;
-        xhr.onreadystatechange = function() {
-          if (xhr.readyState != 4)
-            return;
-
-          event.response = JSON.parse(xhr.responseText);
-          self.dispatchEvent(event);
-        };
 
         if (evt.target === collection.setModel) {
           evt.addedTargets.forEach(function(target) {
+            var xhr = new XMLHttpRequest();
+            self._setupXHR(xhr, target, baseEvent);
             xhr.open("post", url);
             var data = target.toJSON();
             xhr.send(new Blob([data]));
           });
 
           evt.deletedTargets.forEach(function(target) {
+            var xhr = new XMLHttpRequest();
+            self._setupXHR(xhr, target, baseEvent);
             xhr.open("delete", url);
             var data = target.toJSON();
             xhr.send(new Blob([data]));
@@ -805,8 +801,8 @@ maria.Model.subclass(ave, 'Storage', {
           var target = evt.target;
           while (target) {
             if (collection.setModel.has(target)) {
-              event.collectionMember = target;
-
+              var xhr = new XMLHttpRequest();
+              self._setupXHR(xhr, target, baseEvent);
               xhr.open("put", url);
               var data = target.toJSON();
               xhr.send(new Blob([data]));
@@ -817,6 +813,21 @@ maria.Model.subclass(ave, 'Storage', {
         }
       }
     },
+
+    _setupXHR: function(xhr, target, baseEvent) {
+      var self = this;
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState != 4)
+          return;
+
+        var event = {
+          response: JSON.parse(xhr.responseText),
+          collectionMember: target
+        };
+        maria.borrow(event, baseEvent);
+        self.dispatchEvent(event);
+      };
+    }
   }
 });
 maria.Model.subclass(ave, 'Router', {

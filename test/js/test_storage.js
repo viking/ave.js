@@ -100,14 +100,15 @@ define([
 
         this.store.register("foos", setModelClass, function() {
           var setModel = self.store.getCollection("foos");
+          var model = new modelClass();
 
           maria.on(self.store, 'change', done(function(evt) {
             self.assertEquals('foos', evt.collectionName);
             self.assertEquals({foo: "bar"}, evt.response);
             self.assertEquals('save', evt.originalEvent.type);
+            self.assertSame(model, evt.collectionMember);
           }));
 
-          var model = new modelClass();
           model.setName('foo');
           sinon.stub(model, 'toJSON').returns('foobar');
           setModel.add(model);
