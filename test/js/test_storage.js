@@ -102,7 +102,7 @@ define([
           var setModel = self.store.getCollection("foos");
           var model = new modelClass();
 
-          maria.on(self.store, 'change', done(function(evt) {
+          maria.on(self.store, 'add', done(function(evt) {
             self.assertEquals('foos', evt.collectionName);
             self.assertEquals({foo: "bar"}, evt.response);
             self.assertEquals('save', evt.originalEvent.type);
@@ -150,7 +150,7 @@ define([
         this.store.register("foos", setModelClass, function() {
           var setModel = self.store.getCollection("foos");
 
-          maria.on(self.store, 'change', done(function(evt) {
+          maria.on(self.store, 'delete', done(function(evt) {
             self.assertEquals('foos', evt.collectionName);
             self.assertEquals({foo: "bar"}, evt.response);
             self.assertEquals('save', evt.originalEvent.type);

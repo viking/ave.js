@@ -98,7 +98,7 @@ maria.Model.subclass(ave, 'Storage', {
         if (evt.target === collection.setModel) {
           evt.addedTargets.forEach(function(target) {
             var xhr = new XMLHttpRequest();
-            self._setupXHR(xhr, target, baseEvent);
+            self._setupXHR(xhr, target, baseEvent, 'add');
             xhr.open("post", url);
             var data = target.toJSON();
             xhr.send(new Blob([data]));
@@ -106,7 +106,7 @@ maria.Model.subclass(ave, 'Storage', {
 
           evt.deletedTargets.forEach(function(target) {
             var xhr = new XMLHttpRequest();
-            self._setupXHR(xhr, target, baseEvent);
+            self._setupXHR(xhr, target, baseEvent, 'delete');
             xhr.open("delete", url);
             var data = target.toJSON();
             xhr.send(new Blob([data]));
@@ -129,7 +129,7 @@ maria.Model.subclass(ave, 'Storage', {
       }
     },
 
-    _setupXHR: function(xhr, target, baseEvent) {
+    _setupXHR: function(xhr, target, baseEvent, eventType) {
       var self = this;
       xhr.onreadystatechange = function() {
         if (xhr.readyState != 4)
@@ -140,6 +140,9 @@ maria.Model.subclass(ave, 'Storage', {
           collectionMember: target
         };
         maria.borrow(event, baseEvent);
+        if (typeof(eventType) !== 'undefined') {
+          event.type = eventType;
+        }
         self.dispatchEvent(event);
       };
     }
