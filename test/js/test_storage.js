@@ -49,6 +49,7 @@ define([
 
         var evt = spy.getCall(0).args[0];
         this.assertEquals('foos', evt.collectionName);
+        this.assertEquals('save', evt.originalEvent.type);
       },
 
       "registering collection with saved data": function() {
@@ -103,6 +104,7 @@ define([
           maria.on(self.store, 'change', done(function(evt) {
             self.assertEquals('foos', evt.collectionName);
             self.assertEquals({foo: "bar"}, evt.response);
+            self.assertEquals('save', evt.originalEvent.type);
           }));
 
           var model = new modelClass();
@@ -150,6 +152,7 @@ define([
           maria.on(self.store, 'change', done(function(evt) {
             self.assertEquals('foos', evt.collectionName);
             self.assertEquals({foo: "bar"}, evt.response);
+            self.assertEquals('save', evt.originalEvent.type);
           }));
 
           var model = setModel.toArray()[0];
@@ -196,6 +199,7 @@ define([
           maria.on(self.store, 'change', done(function(evt) {
             self.assertEquals('foos', evt.collectionName);
             self.assertEquals({foo: "bar"}, evt.response);
+            self.assertEquals('save', evt.originalEvent.type);
           }));
 
           var model = setModel.toArray()[0];

@@ -769,7 +769,7 @@ maria.Model.subclass(ave, 'Storage', {
       var backend = this.getBackend();
       var mode = this.getMode();
       var collection = this._collections[collectionName];
-      var event = {type: 'change', collectionName: collectionName};
+      var event = {type: 'change', collectionName: collectionName, originalEvent: evt};
 
       if (mode == "local") {
         var data = collection.setModel.toJSON();
