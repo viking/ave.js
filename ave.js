@@ -805,6 +805,8 @@ maria.Model.subclass(ave, 'Storage', {
           var target = evt.target;
           while (target) {
             if (collection.setModel.has(target)) {
+              event.collectionMember = target;
+
               xhr.open("put", url);
               var data = target.toJSON();
               xhr.send(new Blob([data]));

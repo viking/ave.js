@@ -195,14 +195,15 @@ define([
 
         this.store.register("foos", setModelClass, function() {
           var setModel = self.store.getCollection("foos");
+          var model = setModel.toArray()[0];
 
           maria.on(self.store, 'change', done(function(evt) {
             self.assertEquals('foos', evt.collectionName);
             self.assertEquals({foo: "bar"}, evt.response);
             self.assertEquals('save', evt.originalEvent.type);
+            self.assertSame(model, evt.collectionMember);
           }));
 
-          var model = setModel.toArray()[0];
           sinon.stub(model, 'toJSON').returns('foobar');
           model.setName('bar');
           model.save();
@@ -248,16 +249,17 @@ define([
 
         this.store.register("foos", setModelClass, function() {
           var setModel = self.store.getCollection("foos");
+          var model = setModel.toArray()[0];
+          var subModel = model.getBar();
 
           maria.on(self.store, 'change', done(function(evt) {
             self.assertEquals('foos', evt.collectionName);
             self.assertEquals({foo: "bar"}, evt.response);
             self.assertEquals('save', evt.originalEvent.type);
+            self.assertSame(model, evt.collectionMember);
           }));
 
-          var model = setModel.toArray()[0];
           sinon.stub(model, 'toJSON').returns('foobar');
-          var subModel = model.getBar();
           subModel.setBar('blargh');
           subModel.save();
 
