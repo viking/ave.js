@@ -223,6 +223,61 @@ define([
         this.requests.length = 0;
         request.respond(200, { "Content-Type": "application/json" }, '[{"id":1,"name":"foo"}]');
       },
+
+      "updating a nested model in a registered collection": function(done) {
+        if (prod.phantom) {
+          // PhantomJS doesn't have full XMLHttpRequest#requestBody support
+          done();
+          return;
+        }
+
+        var self = this;
+
+        var subModelClass = newModelClass({
+          attributeNames: ['bar']
+        });
+        var modelClass = newModelClass({
+          attributeNames: ['foo'],
+          associations: {
+            bar: {type: 'hasOne', constructor: subModelClass}
+          }
+        });
+        var setModelClass = newSetModelClass({
+          modelConstructor: modelClass
+        });
+
+        this.store.register("foos", setModelClass, function() {
+          var setModel = self.store.getCollection("foos");
+
+          maria.on(self.store, 'change', done(function(evt) {
+            self.assertEquals('foos', evt.collectionName);
+            self.assertEquals({foo: "bar"}, evt.response);
+            self.assertEquals('save', evt.originalEvent.type);
+          }));
+
+          var model = setModel.toArray()[0];
+          sinon.stub(model, 'toJSON').returns('foobar');
+          var subModel = model.getBar();
+          subModel.setBar('blargh');
+          subModel.save();
+
+          self.assertEquals(1, self.requests.length);
+          var request = self.requests[0];
+          self.assertEquals("http://example.com/foos.json", request.url);
+          self.assertEquals("put", request.method);
+          self.assertEquals('foobar', request.requestBody.data);
+          request.respond(200, {"Content-Type": "application/json"}, '{"foo":"bar"}');
+        });
+
+        this.assertEquals(1, this.requests.length);
+        var request = this.requests[0];
+        this.assertEquals("http://example.com/foos.json", request.url);
+        this.assertEquals("get", request.method);
+
+        this.requests.length = 0;
+        request.respond(200, { "Content-Type": "application/json" },
+          '[{"foo":"blah","bar":{"bar":"junk"}}]');
+      },
     })
   });
 });

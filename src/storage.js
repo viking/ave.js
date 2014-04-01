@@ -116,11 +116,16 @@ maria.Model.subclass(ave, 'Storage', {
             xhr.send(new Blob([data]));
           });
         }
-        else if (collection.modelConstructor) {
-          if (evt.target instanceof collection.modelConstructor) {
-            xhr.open("put", url);
-            var data = evt.target.toJSON();
-            xhr.send(new Blob([data]));
+        else {
+          var target = evt.target;
+          while (target) {
+            if (collection.setModel.has(target)) {
+              xhr.open("put", url);
+              var data = target.toJSON();
+              xhr.send(new Blob([data]));
+              break;
+            }
+            target = target.parentNode;
           }
         }
       }
