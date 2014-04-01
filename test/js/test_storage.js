@@ -70,14 +70,26 @@ define([
       setUp: function() {
         this.store = new ave.Storage();
         this.store.setBackend("http://example.com");
-        this.server = sinon.fakeServer.create();
+        this.xhr = sinon.useFakeXMLHttpRequest();
+        var requests = this.requests = [];
+        this.xhr.onCreate = function(request) {
+          requests.push(request);
+        }
       },
 
       tearDown: function() {
-        this.server.restore();
+        this.xhr.restore();
       },
 
       "adding to a registered collection": function(done) {
+        if (prod.phantom) {
+          // PhantomJS doesn't have full XMLHttpRequest#requestBody support
+          done();
+          return;
+        }
+
+        var self = this;
+
         var modelClass = newModelClass({
           attributeNames: ['id', 'name']
         });
@@ -85,34 +97,46 @@ define([
           modelConstructor: modelClass
         });
 
-        this.server.respondWith("GET", "http://example.com/foos.json",
-          [ 200, { "Content-Type": "application/json" }, '' ]
-        );
-        var self = this;
         this.store.register("foos", setModelClass, function() {
           var setModel = self.store.getCollection("foos");
 
-          var called = false;
-          self.server.respondWith("POST", "http://example.com/foos.json", function(request) {
-            called = true;
-            request.respond(200, {}, '{"foo":"bar"}');
-          });
           maria.on(self.store, 'change', done(function(evt) {
-            self.assert(called);
             self.assertEquals('foos', evt.collectionName);
             self.assertEquals({foo: "bar"}, evt.response);
           }));
 
           var model = new modelClass();
           model.setName('foo');
-          sinon.stub(setModel, 'toJSON').returns('foobar');
+          sinon.stub(model, 'toJSON').returns('foobar');
           setModel.add(model);
           setModel.save();
+
+          self.assertEquals(1, self.requests.length);
+          var request = self.requests[0];
+          self.assertEquals("http://example.com/foos.json", request.url);
+          self.assertEquals("post", request.method);
+          self.assertEquals('foobar', request.requestBody.data);
+          request.respond(200, {"Content-Type": "application/json"}, '{"foo":"bar"}');
         });
-        this.server.respond();
+
+        this.assertEquals(1, this.requests.length);
+        var request = this.requests[0];
+        this.assertEquals("http://example.com/foos.json", request.url);
+        this.assertEquals("get", request.method);
+
+        this.requests.length = 0;
+        request.respond(200, {"Content-Type": "application/json"}, '');
       },
 
-      "registering collection with saved data": function(done) {
+      "deleting from a registered collection": function(done) {
+        if (prod.phantom) {
+          // PhantomJS doesn't have full XMLHttpRequest#requestBody support
+          done();
+          return;
+        }
+
+        var self = this;
+
         var modelClass = newModelClass({
           attributeNames: ['id', 'name']
         });
@@ -120,15 +144,80 @@ define([
           modelConstructor: modelClass
         });
 
-        this.server.respondWith("GET", "http://example.com/foos.json",
-          [ 200, { "Content-Type": "application/json" }, '[{"id":1,"name":"foo"}]' ]
-        );
-        var self = this;
-        this.store.register("foos", setModelClass, done(function() {
+        this.store.register("foos", setModelClass, function() {
           var setModel = self.store.getCollection("foos");
-          self.assertEquals(1, setModel.size)
-        }));
-        this.server.respond();
+
+          maria.on(self.store, 'change', done(function(evt) {
+            self.assertEquals('foos', evt.collectionName);
+            self.assertEquals({foo: "bar"}, evt.response);
+          }));
+
+          var model = setModel.toArray()[0];
+          sinon.stub(model, 'toJSON').returns('foobar');
+          setModel['delete'](model);
+          setModel.save();
+
+          self.assertEquals(1, self.requests.length);
+          var request = self.requests[0];
+          self.assertEquals("http://example.com/foos.json", request.url);
+          self.assertEquals("delete", request.method);
+          self.assertEquals('foobar', request.requestBody.data);
+          request.respond(200, {"Content-Type": "application/json"}, '{"foo":"bar"}');
+        });
+
+        this.assertEquals(1, this.requests.length);
+        var request = this.requests[0];
+        this.assertEquals("http://example.com/foos.json", request.url);
+        this.assertEquals("get", request.method);
+
+        this.requests.length = 0;
+        request.respond(200, { "Content-Type": "application/json" }, '[{"id":1,"name":"foo"}]');
+      },
+
+      "updating a model from a registered collection": function(done) {
+        if (prod.phantom) {
+          // PhantomJS doesn't have full XMLHttpRequest#requestBody support
+          done();
+          return;
+        }
+
+        var self = this;
+
+        var modelClass = newModelClass({
+          attributeNames: ['id', 'name']
+        });
+        var setModelClass = newSetModelClass({
+          modelConstructor: modelClass
+        });
+
+        this.store.register("foos", setModelClass, function() {
+          var setModel = self.store.getCollection("foos");
+
+          maria.on(self.store, 'change', done(function(evt) {
+            self.assertEquals('foos', evt.collectionName);
+            self.assertEquals({foo: "bar"}, evt.response);
+          }));
+
+          var model = setModel.toArray()[0];
+          sinon.stub(model, 'toJSON').returns('foobar');
+          model.setName('bar');
+          model.save();
+
+          self.assertEquals(1, self.requests.length);
+          var request = self.requests[0];
+          self.assertEquals("http://example.com/foos.json", request.url);
+          self.assertEquals("put", request.method);
+          self.assertEquals('foobar', request.requestBody.data);
+          request.respond(200, {"Content-Type": "application/json"}, '{"foo":"bar"}');
+        });
+
+        this.assertEquals(1, this.requests.length);
+        var request = this.requests[0];
+        this.assertEquals("http://example.com/foos.json", request.url);
+        this.assertEquals("get", request.method);
+
+        this.requests.length = 0;
+        request.respond(200, { "Content-Type": "application/json" }, '[{"id":1,"name":"foo"}]');
       },
     })
   });

@@ -71,7 +71,7 @@ maria.Model.subclass(ave, 'Storage', {
     _register: function(collectionName, setModelConstructor, setModel) {
       var self = this;
       maria.on(setModel, 'save', function(evt) {
-        self._update(collectionName);
+        self._update(evt, collectionName);
       });
 
       this._collections[collectionName] = {
@@ -80,18 +80,20 @@ maria.Model.subclass(ave, 'Storage', {
       };
     },
 
-    _update: function(collectionName) {
+    _update: function(evt, collectionName) {
       var backend = this.getBackend();
       var mode = this.getMode();
-      var data = this._collections[collectionName].setModel.toJSON();
+      var collection = this._collections[collectionName];
       var event = {type: 'change', collectionName: collectionName};
 
       if (mode == "local") {
+        var data = collection.setModel.toJSON();
         backend[collectionName] = data;
         this.dispatchEvent(event);
       }
       else if (mode == "remote") {
         var xhr = new XMLHttpRequest();
+        var url = backend + "/" + collectionName + ".json";
         var self = this;
         xhr.onreadystatechange = function() {
           if (xhr.readyState != 4)
@@ -100,8 +102,27 @@ maria.Model.subclass(ave, 'Storage', {
           event.response = JSON.parse(xhr.responseText);
           self.dispatchEvent(event);
         };
-        xhr.open("post", backend + "/" + collectionName + ".json");
-        xhr.send(new Blob([data]));
+
+        if (evt.target === collection.setModel) {
+          evt.addedTargets.forEach(function(target) {
+            xhr.open("post", url);
+            var data = target.toJSON();
+            xhr.send(new Blob([data]));
+          });
+
+          evt.deletedTargets.forEach(function(target) {
+            xhr.open("delete", url);
+            var data = target.toJSON();
+            xhr.send(new Blob([data]));
+          });
+        }
+        else if (collection.modelConstructor) {
+          if (evt.target instanceof collection.modelConstructor) {
+            xhr.open("put", url);
+            var data = evt.target.toJSON();
+            xhr.send(new Blob([data]));
+          }
+        }
       }
     },
   }
