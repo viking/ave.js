@@ -100,6 +100,7 @@ define([
       });
       var setModel = new setModelClass();
       this.assertSame(this.modelClass, setModel._modelConstructor);
+      this.assertSame(this.modelClass, setModelClass.modelConstructor);
     },
 
     "toSortedArray does nothing by default": function() {
@@ -292,6 +293,25 @@ define([
       this.assertCalled(spy);
       var evt = spy.getCall(0).args[0];
       this.assertEquals([model], evt.deletedTargets);
+    },
+
+    "save doesn't track of added elements during loading": function() {
+      var modelClass = newModelClass({
+        attributeNames: ['name']
+      });
+      var setModelClass = newSetModelClass({
+        modelConstructor: modelClass
+      });
+      var setModel = new setModelClass();
+      setModel.load([{name: 'foo'}]);
+
+      var spy = sinon.spy();
+      maria.on(setModel, 'save', spy);
+      setModel.save();
+
+      this.assertCalled(spy);
+      var evt = spy.getCall(0).args[0];
+      this.assertEquals([], evt.addedTargets);
     }
   });
 });

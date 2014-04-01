@@ -82,7 +82,9 @@ maria.SetModel.subclass(ave, 'SetModel', {
             maria.on(model, 'validate', this);
             model.parentNode = this;
             this.childAdded(model);
-            this._changes.addedTargets.push(model);
+            if (!this._loading) {
+              this._changes.addedTargets.push(model);
+            }
           }
 
           for (var i = 0; i < evt.deletedTargets.length; i++) {
@@ -147,4 +149,7 @@ ave.SetModel.subclass = function(namespace, name, options) {
   }
   ave.Model.subclass.apply(this, arguments);
   namespace[name].fromJSON = ave.SetModel.fromJSON;
+  if (options && options.modelConstructor) {
+    namespace[name].modelConstructor = options.modelConstructor;
+  }
 };
