@@ -534,6 +534,7 @@ maria.SetModel.subclass(ave, 'SetModel', {
     ave.ValidationHelper.apply(this);
     maria.on(this, 'change', this);
     this._nextId = 1;
+    this._changes = {addedTargets: [], deletedTargets: []};
   },
 
   properties: {
@@ -611,6 +612,9 @@ maria.SetModel.subclass(ave, 'SetModel', {
             maria.on(model, 'validate', this);
             model.parentNode = this;
             this.childAdded(model);
+            if (!this._loading) {
+              this._changes.addedTargets.push(model);
+            }
           }
 
           for (var i = 0; i < evt.deletedTargets.length; i++) {
@@ -620,6 +624,7 @@ maria.SetModel.subclass(ave, 'SetModel', {
             maria.off(model, 'validate', this);
 
             this.childDeleted(model);
+            this._changes.deletedTargets.push(model);
           }
         }
         else {
@@ -639,7 +644,15 @@ maria.SetModel.subclass(ave, 'SetModel', {
     },
 
     save: function() {
-      this.dispatchEvent({type: 'save'});
+      var evt = {
+        type: 'save',
+        addedTargets: this._changes.addedTargets.slice(0),
+        deletedTargets: this._changes.deletedTargets.slice(0)
+      };
+
+      this.dispatchEvent(evt);
+      this._changes.addedTargets.length = 0;
+      this._changes.deletedTargets.length = 0;
     }
   }
 });
@@ -666,6 +679,9 @@ ave.SetModel.subclass = function(namespace, name, options) {
   }
   ave.Model.subclass.apply(this, arguments);
   namespace[name].fromJSON = ave.SetModel.fromJSON;
+  if (options && options.modelConstructor) {
+    namespace[name].modelConstructor = options.modelConstructor;
+  }
 };
 maria.Model.subclass(ave, 'Storage', {
   constructor: function() {
@@ -740,7 +756,7 @@ maria.Model.subclass(ave, 'Storage', {
     _register: function(collectionName, setModelConstructor, setModel) {
       var self = this;
       maria.on(setModel, 'save', function(evt) {
-        self._update(collectionName);
+        self._update(evt, collectionName);
       });
 
       this._collections[collectionName] = {
@@ -749,18 +765,20 @@ maria.Model.subclass(ave, 'Storage', {
       };
     },
 
-    _update: function(collectionName) {
+    _update: function(evt, collectionName) {
       var backend = this.getBackend();
       var mode = this.getMode();
-      var data = this._collections[collectionName].setModel.toJSON();
+      var collection = this._collections[collectionName];
       var event = {type: 'change', collectionName: collectionName};
 
       if (mode == "local") {
+        var data = collection.setModel.toJSON();
         backend[collectionName] = data;
         this.dispatchEvent(event);
       }
       else if (mode == "remote") {
         var xhr = new XMLHttpRequest();
+        var url = backend + "/" + collectionName + ".json";
         var self = this;
         xhr.onreadystatechange = function() {
           if (xhr.readyState != 4)
@@ -769,8 +787,27 @@ maria.Model.subclass(ave, 'Storage', {
           event.response = JSON.parse(xhr.responseText);
           self.dispatchEvent(event);
         };
-        xhr.open("post", backend + "/" + collectionName + ".json");
-        xhr.send(new Blob([data]));
+
+        if (evt.target === collection.setModel) {
+          evt.addedTargets.forEach(function(target) {
+            xhr.open("post", url);
+            var data = target.toJSON();
+            xhr.send(new Blob([data]));
+          });
+
+          evt.deletedTargets.forEach(function(target) {
+            xhr.open("delete", url);
+            var data = target.toJSON();
+            xhr.send(new Blob([data]));
+          });
+        }
+        else if (collection.modelConstructor) {
+          if (evt.target instanceof collection.modelConstructor) {
+            xhr.open("put", url);
+            var data = evt.target.toJSON();
+            xhr.send(new Blob([data]));
+          }
+        }
       }
     },
   }
